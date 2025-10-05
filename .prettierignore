@@ -1,0 +1,21 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+.next
+out
+
+# Cache
+.cache
+.parcel-cache
+*.tsbuildinfo
+
+# Misc
+coverage
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
