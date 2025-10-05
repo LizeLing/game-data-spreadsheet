@@ -11,6 +11,7 @@ import type {
   CellValueChangedEvent,
   ICellRendererParams,
   IHeaderParams,
+  CellContextMenuEvent,
 } from '@ag-grid-community/core';
 import { ModuleRegistry } from '@ag-grid-community/core';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
@@ -18,6 +19,7 @@ import '@ag-grid-community/styles/ag-grid.css';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
 import { useSpreadsheetStore } from '@stores/spreadsheetStore';
 import { useDataValidation } from '@hooks/useDataValidation';
+import { ContextMenu, type ContextMenuItem } from '@components/ui/ContextMenu';
 import type { Sheet, Cell, CellType } from '@types';
 import type { ValidationResult } from '@services/validation/validationEngine';
 import {
@@ -465,6 +467,7 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
 
   const activeSheetId = useSpreadsheetStore((state) => state.activeSheetId);
   const sheets = useSpreadsheetStore((state) => state.sheets);
+  const selection = useSpreadsheetStore((state) => state.selection);
   const updateCell = useSpreadsheetStore((state) => state.updateCell);
   const setSelection = useSpreadsheetStore((state) => state.setSelection);
   const copySelection = useSpreadsheetStore((state) => state.copySelection);
@@ -472,9 +475,25 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
   const pasteFromClipboard = useSpreadsheetStore(
     (state) => state.pasteFromClipboard
   );
+  const addRow = useSpreadsheetStore((state) => state.addRow);
+  const addColumn = useSpreadsheetStore((state) => state.addColumn);
+  const removeRow = useSpreadsheetStore((state) => state.removeRow);
+  const removeColumn = useSpreadsheetStore((state) => state.removeColumn);
+  const mergeCells = useSpreadsheetStore((state) => state.mergeCells);
+  const unmergeCells = useSpreadsheetStore((state) => state.unmergeCells);
+  const getMergedCell = useSpreadsheetStore((state) => state.getMergedCell);
+  const applyCellStyle = useSpreadsheetStore((state) => state.applyCellStyle);
+  const sortSheet = useSpreadsheetStore((state) => state.sortSheet);
 
   // Initialize data validation hook at component level
   const { validateCell } = useDataValidation();
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    items: ContextMenuItem[];
+  } | null>(null);
 
   const currentSheetId = sheetId || activeSheetId;
   const sheet = sheets.find((s) => s.id === currentSheetId);
@@ -601,6 +620,194 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
     });
   }, [sheet, setSelection]);
 
+  // Handle cell context menu (right-click)
+  const onCellContextMenu = useCallback(
+    (event: CellContextMenuEvent) => {
+      event.event?.preventDefault();
+
+      const rowIndex = event.rowIndex;
+      const columnId = event.column?.getColId();
+      const columnIndex = sheet?.columns.findIndex((col) => col.id === columnId);
+
+      if (rowIndex === null || rowIndex === undefined || columnIndex === undefined || columnIndex < 0 || !sheet) {
+        return;
+      }
+
+      const row = sheet.rows[rowIndex];
+      if (!row) return;
+
+      const hasMergedCell = getMergedCell(currentSheetId, rowIndex, columnIndex);
+
+      const menuItems: ContextMenuItem[] = [
+        {
+          id: 'copy',
+          label: '복사',
+          icon: '📋',
+          shortcut: 'Ctrl+C',
+          action: () => copySelection(),
+        },
+        {
+          id: 'cut',
+          label: '잘라내기',
+          icon: '✂️',
+          shortcut: 'Ctrl+X',
+          action: () => cutSelection(),
+        },
+        {
+          id: 'paste',
+          label: '붙여넣기',
+          icon: '📄',
+          shortcut: 'Ctrl+V',
+          action: () => pasteFromClipboard(),
+        },
+        {
+          id: 'separator1',
+          label: '',
+          separator: true,
+          action: () => {},
+        },
+        {
+          id: 'insert-row-above',
+          label: '위에 행 삽입',
+          icon: '⬆️',
+          action: () => addRow(currentSheetId, rowIndex - 1),
+        },
+        {
+          id: 'insert-row-below',
+          label: '아래에 행 삽입',
+          icon: '⬇️',
+          action: () => addRow(currentSheetId, rowIndex),
+        },
+        {
+          id: 'delete-row',
+          label: '행 삭제',
+          icon: '🗑️',
+          shortcut: 'Ctrl+Del',
+          action: () => {
+            if (selection) {
+              const rowsToDelete = [];
+              for (let i = selection.startRow; i <= selection.endRow; i++) {
+                const r = sheet.rows[i];
+                if (r) rowsToDelete.push(r.id);
+              }
+              rowsToDelete.forEach((rowId) => removeRow(currentSheetId, rowId));
+            } else {
+              removeRow(currentSheetId, row.id);
+            }
+          },
+        },
+        {
+          id: 'separator2',
+          label: '',
+          separator: true,
+          action: () => {},
+        },
+        {
+          id: 'insert-column-left',
+          label: '왼쪽에 열 삽입',
+          icon: '⬅️',
+          action: () => addColumn(currentSheetId, columnIndex - 1),
+        },
+        {
+          id: 'insert-column-right',
+          label: '오른쪽에 열 삽입',
+          icon: '➡️',
+          action: () => addColumn(currentSheetId, columnIndex),
+        },
+        {
+          id: 'delete-column',
+          label: '열 삭제',
+          icon: '🗑️',
+          action: () => {
+            const column = sheet.columns[columnIndex];
+            if (column) {
+              removeColumn(currentSheetId, column.id);
+            }
+          },
+        },
+        {
+          id: 'separator3',
+          label: '',
+          separator: true,
+          action: () => {},
+        },
+        {
+          id: 'merge-cells',
+          label: '셀 병합',
+          icon: '⬜',
+          disabled: !selection || !!hasMergedCell,
+          action: () => {
+            if (selection) {
+              mergeCells(currentSheetId, selection);
+            }
+          },
+        },
+        {
+          id: 'unmerge-cells',
+          label: '병합 해제',
+          icon: '⬛',
+          disabled: !hasMergedCell,
+          action: () => {
+            if (hasMergedCell) {
+              unmergeCells(currentSheetId, hasMergedCell.id);
+            }
+          },
+        },
+        {
+          id: 'separator4',
+          label: '',
+          separator: true,
+          action: () => {},
+        },
+        {
+          id: 'sort-asc',
+          label: '오름차순 정렬',
+          icon: '↑',
+          action: () => {
+            const column = sheet.columns[columnIndex];
+            if (column) {
+              sortSheet(currentSheetId, { columnId: column.id, direction: 'asc' });
+            }
+          },
+        },
+        {
+          id: 'sort-desc',
+          label: '내림차순 정렬',
+          icon: '↓',
+          action: () => {
+            const column = sheet.columns[columnIndex];
+            if (column) {
+              sortSheet(currentSheetId, { columnId: column.id, direction: 'desc' });
+            }
+          },
+        },
+      ];
+
+      const mouseEvent = event.event as MouseEvent;
+      setContextMenu({
+        x: mouseEvent.clientX,
+        y: mouseEvent.clientY,
+        items: menuItems,
+      });
+    },
+    [
+      sheet,
+      currentSheetId,
+      selection,
+      getMergedCell,
+      copySelection,
+      cutSelection,
+      pasteFromClipboard,
+      addRow,
+      addColumn,
+      removeRow,
+      removeColumn,
+      mergeCells,
+      unmergeCells,
+      sortSheet,
+    ]
+  );
+
   // Handle keyboard shortcuts for clipboard operations
   const handleKeyDown = useCallback(
     async (event: KeyboardEvent) => {
@@ -668,6 +875,7 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
         onCellValueChanged={onCellValueChanged}
         onCellClicked={onCellClicked}
         onRangeSelectionChanged={onRangeSelectionChanged}
+        onCellContextMenu={onCellContextMenu}
         defaultColDef={{
           flex: 1,
           minWidth: 100,
@@ -685,6 +893,14 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
         ensureDomOrder={true}
         domLayout="normal"
       />
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenu.items}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };
