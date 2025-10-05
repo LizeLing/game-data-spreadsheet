@@ -3,14 +3,16 @@
  * 상단 툴바 - 파일 작업, 편집, 포맷 등
  */
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { useSpreadsheetStore } from '@stores/spreadsheetStore';
 import { useImportExport, type ExportFormat } from '@hooks/useImportExport';
+import { useKeyboardShortcuts, type KeyboardShortcut } from '@hooks/useKeyboardShortcuts';
 import type { FilterConfig, Sheet } from '@types';
 import { SearchDialog } from '../dialogs/SearchDialog';
 import { ValidationPanel } from '../dialogs/ValidationPanel';
 import { ConditionalFormatDialog } from '../dialogs/ConditionalFormatDialog';
 import { AdvancedFormatDialog } from '../dialogs/AdvancedFormatDialog';
+import { ShortcutHelpDialog } from '../dialogs/ShortcutHelpDialog';
 
 export const Toolbar = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -22,6 +24,7 @@ export const Toolbar = () => {
     useState(false);
   const [showAdvancedFormatDialog, setShowAdvancedFormatDialog] =
     useState(false);
+  const [showShortcutHelp, setShowShortcutHelp] = useState(false);
 
   const activeSheetId = useSpreadsheetStore((state) => state.activeSheetId);
   const sheets = useSpreadsheetStore((state) => state.sheets);
@@ -45,23 +48,118 @@ export const Toolbar = () => {
 
   const activeSheet = sheets.find((s) => s.id === activeSheetId);
 
-  // Keyboard shortcuts (Ctrl+S for save, Ctrl+Shift+V for validation)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        saveSpreadsheet();
-      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'v') {
-        e.preventDefault();
-        if (activeSheet) {
-          setShowValidationPanel(true);
-        }
-      }
-    };
+  // Define keyboard shortcuts
+  const shortcuts = useMemo<KeyboardShortcut[]>(
+    () => [
+      // File operations
+      {
+        key: 's',
+        ctrl: true,
+        description: '스프레드시트 저장',
+        category: 'file',
+        action: () => saveSpreadsheet(),
+      },
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [saveSpreadsheet, activeSheet]);
+      // Edit operations
+      {
+        key: 'z',
+        ctrl: true,
+        description: '실행 취소',
+        category: 'edit',
+        action: () => undo(),
+      },
+      {
+        key: 'y',
+        ctrl: true,
+        description: '다시 실행',
+        category: 'edit',
+        action: () => redo(),
+      },
+      {
+        key: 'd',
+        ctrl: true,
+        description: '현재 행 복제',
+        category: 'edit',
+        action: () => {
+          if (selection && activeSheet) {
+            const rowIndex = selection.startRow;
+            addRow(activeSheetId, rowIndex);
+          }
+        },
+      },
+      {
+        key: 'Delete',
+        ctrl: true,
+        description: '현재 행 삭제',
+        category: 'edit',
+        action: () => {
+          if (selection && activeSheet) {
+            const rowsToDelete = [];
+            for (let i = selection.startRow; i <= selection.endRow; i++) {
+              const row = activeSheet.rows[i];
+              if (row) rowsToDelete.push(row.id);
+            }
+            rowsToDelete.forEach((rowId) => removeRow(activeSheetId, rowId));
+          }
+        },
+      },
+
+      // Search and replace
+      {
+        key: 'f',
+        ctrl: true,
+        description: '찾기',
+        category: 'edit',
+        action: () => setShowSearchDialog(true),
+      },
+      {
+        key: 'h',
+        ctrl: true,
+        description: '바꾸기',
+        category: 'edit',
+        action: () => setShowSearchDialog(true),
+      },
+
+      // View
+      {
+        key: 'v',
+        ctrl: true,
+        shift: true,
+        description: '데이터 검증 패널',
+        category: 'view',
+        action: () => {
+          if (activeSheet) {
+            setShowValidationPanel(true);
+          }
+        },
+      },
+
+      // Help
+      {
+        key: '/',
+        ctrl: true,
+        description: '단축키 도움말',
+        category: 'help',
+        action: () => setShowShortcutHelp(true),
+      },
+    ],
+    [
+      saveSpreadsheet,
+      undo,
+      redo,
+      selection,
+      activeSheet,
+      activeSheetId,
+      addRow,
+      removeRow,
+    ]
+  );
+
+  // Apply keyboard shortcuts
+  const { getShortcutText, getShortcutsByCategory } = useKeyboardShortcuts({
+    shortcuts,
+    enabled: true,
+  });
 
   const handleAddRow = () => {
     if (selection) {
@@ -449,6 +547,16 @@ export const Toolbar = () => {
             <span className="text-sm">📤 내보내기</span>
           </ToolbarButton>
         </div>
+
+        {/* Help */}
+        <div className="flex items-center gap-1">
+          <ToolbarButton
+            onClick={() => setShowShortcutHelp(true)}
+            title="단축키 도움말 (Ctrl+/)"
+          >
+            <span className="text-sm">❓</span>
+          </ToolbarButton>
+        </div>
       </div>
 
       {/* Search Dialog */}
@@ -488,6 +596,15 @@ export const Toolbar = () => {
           selection={selection}
           sheetId={activeSheetId}
           onClose={() => setShowAdvancedFormatDialog(false)}
+        />
+      )}
+
+      {/* Shortcut Help Dialog */}
+      {showShortcutHelp && (
+        <ShortcutHelpDialog
+          shortcuts={getShortcutsByCategory()}
+          getShortcutText={getShortcutText}
+          onClose={() => setShowShortcutHelp(false)}
         />
       )}
     </div>
