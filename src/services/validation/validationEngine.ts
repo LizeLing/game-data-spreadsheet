@@ -25,7 +25,8 @@ export interface ValidationResult {
  */
 export const validateValueType = (
   value: any,
-  expectedType: CellType
+  expectedType: CellType,
+  options?: string[]
 ): { valid: boolean; message?: string } => {
   // 빈 값은 허용
   if (value === null || value === undefined || value === '') {
@@ -73,8 +74,35 @@ export const validateValueType = (
       return { valid: true };
 
     case 'select':
+      // 단일 선택: 값이 options 배열에 포함되어 있는지 확인
+      if (options && options.length > 0) {
+        const valueStr = String(value).trim();
+        if (!options.includes(valueStr)) {
+          return {
+            valid: false,
+            message: `"${value}"는 유효한 옵션이 아닙니다. 가능한 값: ${options.join(', ')}`,
+          };
+        }
+      }
+      return { valid: true };
+
     case 'multiselect':
-      // 선택 타입은 별도 옵션 검증 필요 (추후 구현)
+      // 다중 선택: 쉼표로 구분된 값들이 모두 options에 포함되는지 확인
+      if (options && options.length > 0) {
+        const valueStr = String(value).trim();
+        const values = valueStr
+          .split(',')
+          .map((v) => v.trim())
+          .filter((v) => v !== '');
+
+        const invalidValues = values.filter((v) => !options.includes(v));
+        if (invalidValues.length > 0) {
+          return {
+            valid: false,
+            message: `유효하지 않은 옵션: ${invalidValues.join(', ')}. 가능한 값: ${options.join(', ')}`,
+          };
+        }
+      }
       return { valid: true };
 
     default:
@@ -85,14 +113,15 @@ export const validateValueType = (
 // Cell-level validation
 export const validateCell = (
   cell: Cell,
-  columnType?: CellType
+  columnType?: CellType,
+  columnOptions?: string[]
 ): ValidationResult => {
   const errors: ValidationError[] = [];
   const warnings: ValidationError[] = [];
 
   // 1. 컬럼 타입 검증
   if (columnType && columnType !== 'formula') {
-    const typeCheck = validateValueType(cell.value, columnType);
+    const typeCheck = validateValueType(cell.value, columnType, columnOptions);
     if (!typeCheck.valid) {
       errors.push({
         cellId: cell.id,
@@ -158,7 +187,7 @@ export const validateRow = (
   columns.forEach((column) => {
     const cell = row.cells[column.id];
     if (cell) {
-      const cellResult = validateCell(cell, column.type);
+      const cellResult = validateCell(cell, column.type, column.options);
       errors.push(...cellResult.errors);
       warnings.push(...cellResult.warnings);
     }

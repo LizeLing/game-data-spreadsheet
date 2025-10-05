@@ -25,6 +25,48 @@ npm run dev
 npm run build
 ```
 
+## Testing
+
+The project uses two independent testing systems:
+
+### Unit Tests (Vitest)
+```bash
+# Run all unit tests (208 tests)
+npm run test:run
+
+# Watch mode (for development)
+npm test
+
+# UI mode (browser-based test viewer)
+npm run test:ui
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### E2E Tests (Playwright)
+```bash
+# Run E2E tests
+npm run test:e2e
+
+# UI mode (step-by-step debugging)
+npm run test:e2e:ui
+
+# Headed mode (see browser)
+npm run test:e2e:headed
+
+# Debug mode
+npm run test:e2e:debug
+```
+
+### Run All Tests
+```bash
+# Unit + E2E tests
+npm run test:all
+```
+
+**Note:** Unit tests and E2E tests are completely separated. `npm run test:run` only runs unit tests (no E2E), and E2E tests are only executed via `npm run test:e2e`.
+
 ## Data Validation
 
 Use the built-in validation system to ensure data integrity:
@@ -51,6 +93,24 @@ Click the **"✓ 검증"** button in the toolbar or press `Ctrl+Shift+V` to open
 }
 ```
 
+## Cell Selection
+
+### Single Cell Selection
+- **Click**: Select a single cell
+
+### Multiple Cell Selection (Range Selection)
+- **Click and Drag**: Click on a cell and drag to select a range
+- **Shift + Click**: Select from current cell to clicked cell
+- **Ctrl + Click**: Add/remove individual cells to selection (multi-range)
+- **Click on Row Number**: Select entire row
+- **Click on Column Header**: Select entire column
+- **Ctrl + A**: Select all cells
+
+### Visual Feedback
+- Selected cells are highlighted with a blue background
+- Selection borders are shown in blue (2px solid)
+- Multiple overlapping selections show darker blue shades
+
 ## Keyboard Shortcuts
 
 - `Ctrl+S`: Save spreadsheet
@@ -58,8 +118,74 @@ Click the **"✓ 검증"** button in the toolbar or press `Ctrl+Shift+V` to open
 - `Ctrl+F`: Find and replace
 - `Ctrl+C/X/V`: Copy/Cut/Paste
 - `Ctrl+Z/Y`: Undo/Redo
+- `Ctrl+A`: Select all cells
 
 ## Recent Updates
+
+### ✅ Advanced Features Added (2025-10-06)
+
+**Phase 3-4 Implementation Complete:**
+
+#### 1. Conditional Formatting UI
+- **ConditionalFormatDialog** with visual rule editor
+- Game data presets (Rarity, Stat Ranges, Quality, Status)
+- Priority-based formatting rules
+- Real-time preview
+
+**Usage:**
+```typescript
+// Click "🎨 조건부" button in toolbar
+// Select preset or create custom rules
+// Apply to entire sheet or specific ranges
+```
+
+#### 2. Advanced Cell Formatting
+- **AdvancedFormatDialog** with comprehensive styling options
+- Border styles (individual sides: top/right/bottom/left)
+- Font family and size selection (12+ fonts, 8-72pt)
+- Number format presets (#,##0.00, 0.0%, $#,##0, etc.)
+- Real-time preview
+
+**Toolbar Button:** "⚙️ 고급"
+
+#### 3. Row/Column Insert & Delete
+- Insert row/column at selected position
+- Delete selected rows/columns
+- Smart positioning (after selection or append)
+- Full undo/redo support
+
+**New Toolbar Buttons:**
+- ➕ 행 / ➖ 행 (Row insert/delete)
+- ➕ 열 / ➖ 열 (Column insert/delete)
+
+#### 4. Additional Game Templates (6 New!)
+- **Enemy Wave** - Wave-based enemy spawning
+- **Drop Table** - Item drop rates and loot
+- **Achievement** - Trophy/achievement system
+- **Tutorial** - Onboarding steps
+- **Season Pass** - Battle pass rewards
+- **Gacha Pool** - Gacha/loot box probabilities
+
+**🆕 Auto-populate Sample Data:**
+- Templates now automatically create rows with sample data
+- If no sample data exists, creates 10 empty rows for quick start
+- Fully editable and expandable
+
+#### 5. Game-Specific Formula Functions (4 New!)
+- **STAT_SCALE(level, base, growth, formula)** - Stat scaling (linear/exponential/logarithmic/quadratic)
+- **DROP_RATE(baseRate, luck, enemyLvl, playerLvl)** - Drop rate calculation with luck bonus
+- **EXP_CURVE(level, baseExp, multiplier, exponent)** - Experience curve calculation
+- **GACHA_RATE(rarity, pityCounter, baseRate, threshold)** - Gacha rates with pity system
+
+**Examples:**
+```typescript
+=STAT_SCALE(10, 100, 10, "exponential") // → 235.79
+=DROP_RATE(10, 50, 20, 25) // → 17.5% (with luck and level bonus)
+=EXP_CURVE(10, 100, 1.5, 1.5) // → 1837
+=GACHA_RATE(6, 89, 0.6, 90) // → 100% (pity reached)
+```
+
+---
 
 ### ✅ Data Validation UI (2025-10-06)
 

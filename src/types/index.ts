@@ -42,3 +42,6 @@ export type {
   GameEnemy,
   BalanceConfig,
 } from './game-data';
+
+// Toast types
+export type { Toast, ToastType } from '../stores/toastStore';

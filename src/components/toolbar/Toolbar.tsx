@@ -9,6 +9,8 @@ import { useImportExport, type ExportFormat } from '@hooks/useImportExport';
 import type { FilterConfig, Sheet } from '@types';
 import { SearchDialog } from '../dialogs/SearchDialog';
 import { ValidationPanel } from '../dialogs/ValidationPanel';
+import { ConditionalFormatDialog } from '../dialogs/ConditionalFormatDialog';
+import { AdvancedFormatDialog } from '../dialogs/AdvancedFormatDialog';
 
 export const Toolbar = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -16,6 +18,10 @@ export const Toolbar = () => {
   const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [showValidationPanel, setShowValidationPanel] = useState(false);
+  const [showConditionalFormatDialog, setShowConditionalFormatDialog] =
+    useState(false);
+  const [showAdvancedFormatDialog, setShowAdvancedFormatDialog] =
+    useState(false);
 
   const activeSheetId = useSpreadsheetStore((state) => state.activeSheetId);
   const sheets = useSpreadsheetStore((state) => state.sheets);
@@ -33,6 +39,8 @@ export const Toolbar = () => {
   const mergeCells = useSpreadsheetStore((state) => state.mergeCells);
   const getMergedCell = useSpreadsheetStore((state) => state.getMergedCell);
   const unmergeCells = useSpreadsheetStore((state) => state.unmergeCells);
+  const removeRow = useSpreadsheetStore((state) => state.removeRow);
+  const removeColumn = useSpreadsheetStore((state) => state.removeColumn);
   const { importFile, exportSheet } = useImportExport();
 
   const activeSheet = sheets.find((s) => s.id === activeSheetId);
@@ -56,11 +64,47 @@ export const Toolbar = () => {
   }, [saveSpreadsheet, activeSheet]);
 
   const handleAddRow = () => {
-    addRow(activeSheetId);
+    if (selection) {
+      // Insert after selected row
+      addRow(activeSheetId, selection.endRow);
+    } else {
+      // Append at end
+      addRow(activeSheetId);
+    }
   };
 
   const handleAddColumn = () => {
-    addColumn(activeSheetId);
+    if (selection) {
+      // Insert after selected column
+      addColumn(activeSheetId, selection.endColumn);
+    } else {
+      // Append at end
+      addColumn(activeSheetId);
+    }
+  };
+
+  const handleDeleteRow = () => {
+    if (!selection || !activeSheet) return;
+
+    const rowsToDelete = [];
+    for (let i = selection.startRow; i <= selection.endRow; i++) {
+      const row = activeSheet.rows[i];
+      if (row) rowsToDelete.push(row.id);
+    }
+
+    rowsToDelete.forEach((rowId) => removeRow(activeSheetId, rowId));
+  };
+
+  const handleDeleteColumn = () => {
+    if (!selection || !activeSheet) return;
+
+    const columnsToDelete = [];
+    for (let i = selection.startColumn; i <= selection.endColumn; i++) {
+      const column = activeSheet.columns[i];
+      if (column) columnsToDelete.push(column.id);
+    }
+
+    columnsToDelete.forEach((columnId) => removeColumn(activeSheetId, columnId));
   };
 
   const handleUndo = () => {
@@ -202,13 +246,33 @@ export const Toolbar = () => {
           </ToolbarButton>
         </div>
 
-        {/* Insert operations */}
+        {/* Insert/Delete operations */}
         <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton onClick={handleAddRow} title="행 추가">
+          <ToolbarButton
+            onClick={handleAddRow}
+            title={selection ? '선택 위치 다음에 행 삽입' : '행 추가'}
+          >
             <span className="text-sm">➕ 행</span>
           </ToolbarButton>
-          <ToolbarButton onClick={handleAddColumn} title="열 추가">
+          <ToolbarButton
+            onClick={handleDeleteRow}
+            title="선택한 행 삭제"
+            disabled={!selection}
+          >
+            <span className="text-sm">➖ 행</span>
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={handleAddColumn}
+            title={selection ? '선택 위치 다음에 열 삽입' : '열 추가'}
+          >
             <span className="text-sm">➕ 열</span>
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={handleDeleteColumn}
+            title="선택한 열 삭제"
+            disabled={!selection}
+          >
+            <span className="text-sm">➖ 열</span>
           </ToolbarButton>
         </div>
 
@@ -243,6 +307,24 @@ export const Toolbar = () => {
             disabled={!activeSheet}
           >
             <span className="text-sm">✓ 검증</span>
+          </ToolbarButton>
+        </div>
+
+        {/* Conditional Formatting */}
+        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+          <ToolbarButton
+            onClick={() => setShowConditionalFormatDialog(true)}
+            title="조건부 서식"
+            disabled={!activeSheet}
+          >
+            <span className="text-sm">🎨 조건부</span>
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => setShowAdvancedFormatDialog(true)}
+            title="고급 서식 (테두리, 폰트, 숫자 포맷)"
+            disabled={!selection}
+          >
+            <span className="text-sm">⚙️ 고급</span>
           </ToolbarButton>
         </div>
 
@@ -389,6 +471,23 @@ export const Toolbar = () => {
         <ValidationPanel
           sheet={activeSheet}
           onClose={() => setShowValidationPanel(false)}
+        />
+      )}
+
+      {/* Conditional Format Dialog */}
+      {showConditionalFormatDialog && activeSheet && (
+        <ConditionalFormatDialog
+          sheet={activeSheet}
+          onClose={() => setShowConditionalFormatDialog(false)}
+        />
+      )}
+
+      {/* Advanced Format Dialog */}
+      {showAdvancedFormatDialog && selection && (
+        <AdvancedFormatDialog
+          selection={selection}
+          sheetId={activeSheetId}
+          onClose={() => setShowAdvancedFormatDialog(false)}
         />
       )}
     </div>

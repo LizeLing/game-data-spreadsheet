@@ -26,4 +26,50 @@ body {
   --ag-header-background-color: rgb(248, 250, 252);
   --ag-odd-row-background-color: rgb(255, 255, 255);
   --ag-even-row-background-color: rgb(249, 250, 251);
+  --ag-range-selection-border-color: rgb(59, 130, 246);
+  --ag-range-selection-background-color: rgba(59, 130, 246, 0.1);
+  --ag-range-selection-highlight-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Enhanced range selection styling */
+.ag-theme-alpine .ag-cell-range-selected:not(.ag-cell-focus) {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.ag-theme-alpine .ag-cell-range-selected-1:not(.ag-cell-focus) {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.ag-theme-alpine .ag-cell-range-selected-2:not(.ag-cell-focus) {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.ag-theme-alpine .ag-cell-range-selected-3:not(.ag-cell-focus) {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.ag-theme-alpine .ag-cell-range-selected-4:not(.ag-cell-focus) {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Range selection handle */
+.ag-theme-alpine .ag-fill-handle {
+  background-color: rgb(59, 130, 246);
+}
+
+/* Range selection border */
+.ag-theme-alpine .ag-cell-range-top {
+  border-top: 2px solid rgb(59, 130, 246) !important;
+}
+
+.ag-theme-alpine .ag-cell-range-right {
+  border-right: 2px solid rgb(59, 130, 246) !important;
+}
+
+.ag-theme-alpine .ag-cell-range-bottom {
+  border-bottom: 2px solid rgb(59, 130, 246) !important;
+}
+
+.ag-theme-alpine .ag-cell-range-left {
+  border-left: 2px solid rgb(59, 130, 246) !important;
 }

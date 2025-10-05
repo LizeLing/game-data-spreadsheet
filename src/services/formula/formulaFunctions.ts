@@ -46,6 +46,10 @@ export const FORMULA_FUNCTIONS: Record<string, FormulaFunction> = {
   DAMAGE_CALC,
   STAT_TOTAL,
   RARITY_BONUS,
+  STAT_SCALE,
+  DROP_RATE,
+  EXP_CURVE,
+  GACHA_RATE,
 };
 
 // ============ Math Functions ============
@@ -349,7 +353,10 @@ function flattenAndFilter(arr: (CellValue | CellValue[])[]): number[] {
 /**
  * Convert to number
  */
-function toNumber(value: CellValue | CellValue[]): number | null {
+function toNumber(value: CellValue | CellValue[] | undefined): number | null {
+  // Handle undefined
+  if (value === undefined) return null;
+
   // If array is passed, reject it (ranges should only be in function contexts)
   if (Array.isArray(value)) {
     // For single-element arrays, take the first element
@@ -386,4 +393,190 @@ function toBoolean(value: CellValue | CellValue[]): boolean {
     return value.length > 0;
   }
   return value !== null && value !== undefined;
+}
+
+// ========== 추가 게임 전용 함수 ==========
+
+/**
+ * STAT_SCALE(level, baseValue, growthRate, formula)
+ * 레벨에 따른 스탯 스케일링 계산
+ *
+ * @param level - 레벨
+ * @param baseValue - 기본 값
+ * @param growthRate - 성장률 (%, 기본값 10)
+ * @param formula - 공식 타입 ('linear', 'exponential', 'logarithmic', 기본값 'linear')
+ *
+ * Examples:
+ * - STAT_SCALE(10, 100, 10) → 190 (linear: 100 + (10-1) * 10)
+ * - STAT_SCALE(10, 100, 10, "exponential") → 235.79 (exponential growth)
+ */
+function STAT_SCALE(
+  level: CellValue | CellValue[],
+  baseValue: CellValue | CellValue[],
+  growthRate?: CellValue | CellValue[],
+  formula?: CellValue | CellValue[]
+): CellValue {
+  const lvl = toNumber(level);
+  const base = toNumber(baseValue);
+  const growth = toNumber(growthRate) ?? 10; // Default 10%
+  const formulaType = toString(formula) ?? 'linear';
+
+  if (lvl === null || base === null) return '#VALUE!';
+  if (lvl < 1) return '#VALUE!';
+
+  switch (formulaType.toLowerCase()) {
+    case 'linear':
+      // base + (level - 1) * growth
+      return base + (lvl - 1) * growth;
+
+    case 'exponential':
+      // base * (1 + growth/100) ^ (level - 1)
+      return base * Math.pow(1 + growth / 100, lvl - 1);
+
+    case 'logarithmic':
+      // base + growth * log(level)
+      return base + growth * Math.log(lvl);
+
+    case 'quadratic':
+      // base + growth * (level - 1) ^ 2
+      return base + growth * Math.pow(lvl - 1, 2);
+
+    default:
+      return '#VALUE!';
+  }
+}
+
+/**
+ * DROP_RATE(baseRate, luckStat, enemyLevel, playerLevel)
+ * 드랍 확률 계산 (행운 스탯 및 레벨 차이 반영)
+ *
+ * @param baseRate - 기본 드랍률 (%)
+ * @param luckStat - 행운 스탯 (0-100)
+ * @param enemyLevel - 적 레벨 (선택)
+ * @param playerLevel - 플레이어 레벨 (선택)
+ *
+ * Examples:
+ * - DROP_RATE(10, 50) → 15% (luck bonus: +5%)
+ * - DROP_RATE(10, 50, 20, 25) → 17.5% (luck + level bonus)
+ */
+function DROP_RATE(
+  baseRate: CellValue | CellValue[],
+  luckStat?: CellValue | CellValue[],
+  enemyLevel?: CellValue | CellValue[],
+  playerLevel?: CellValue | CellValue[]
+): CellValue {
+  const base = toNumber(baseRate);
+  const luck = toNumber(luckStat) ?? 0;
+  const eLvl = toNumber(enemyLevel);
+  const pLvl = toNumber(playerLevel);
+
+  if (base === null) return '#VALUE!';
+
+  let finalRate = base;
+
+  // Luck bonus: +0.1% per luck point
+  if (luck > 0) {
+    finalRate += luck * 0.1;
+  }
+
+  // Level difference bonus: +2.5% if player level > enemy level
+  if (eLvl !== null && pLvl !== null && pLvl > eLvl) {
+    const levelDiff = pLvl - eLvl;
+    finalRate += levelDiff * 2.5;
+  }
+
+  // Cap at 100%
+  return Math.min(finalRate, 100);
+}
+
+/**
+ * EXP_CURVE(level, baseExp, multiplier, exponent)
+ * 레벨업에 필요한 경험치 계산
+ *
+ * @param level - 레벨
+ * @param baseExp - 기본 경험치
+ * @param multiplier - 배율 (기본값 1.5)
+ * @param exponent - 지수 (기본값 1.5)
+ *
+ * Examples:
+ * - EXP_CURVE(1) → 100 (default)
+ * - EXP_CURVE(10, 100, 1.5, 1.5) → 1837 (100 * 1.5 * 10^1.5)
+ */
+function EXP_CURVE(
+  level: CellValue | CellValue[],
+  baseExp?: CellValue | CellValue[],
+  multiplier?: CellValue | CellValue[],
+  exponent?: CellValue | CellValue[]
+): CellValue {
+  const lvl = toNumber(level);
+  const base = toNumber(baseExp) ?? 100;
+  const mult = toNumber(multiplier) ?? 1.5;
+  const exp = toNumber(exponent) ?? 1.5;
+
+  if (lvl === null || lvl < 1) return '#VALUE!';
+
+  // Formula: baseExp * multiplier * level ^ exponent
+  return Math.round(base * mult * Math.pow(lvl, exp));
+}
+
+/**
+ * GACHA_RATE(rarity, pityCounter, baseRate, pityThreshold)
+ * 가챠 확률 계산 (천장 시스템 포함)
+ *
+ * @param rarity - 희귀도 레벨 (1-6: common, uncommon, rare, epic, legendary, mythic)
+ * @param pityCounter - 현재 뽑기 횟수
+ * @param baseRate - 기본 확률 (%, 선택)
+ * @param pityThreshold - 천장 임계값 (선택, 기본값 90)
+ *
+ * Examples:
+ * - GACHA_RATE(6, 0) → 0.6% (mythic base rate)
+ * - GACHA_RATE(6, 89, 0.6, 90) → 100% (pity reached)
+ */
+function GACHA_RATE(
+  rarity: CellValue | CellValue[],
+  pityCounter?: CellValue | CellValue[],
+  baseRate?: CellValue | CellValue[],
+  pityThreshold?: CellValue | CellValue[]
+): CellValue {
+  const rarityLevel = toNumber(rarity);
+  const pity = toNumber(pityCounter) ?? 0;
+  let base = toNumber(baseRate);
+  const threshold = toNumber(pityThreshold) ?? 90;
+
+  if (rarityLevel === null || rarityLevel < 1 || rarityLevel > 6) {
+    return '#VALUE!';
+  }
+
+  // Default base rates for each rarity (if not provided)
+  if (base === null) {
+    const defaultRates = [40, 25, 15, 10, 5, 0.6]; // common ~ mythic
+    base = defaultRates[rarityLevel - 1];
+  }
+
+  // Pity system: if pity counter >= threshold, guarantee (100%)
+  if (pity >= threshold) {
+    return 100;
+  }
+
+  // Soft pity: increase rate gradually from 75% of threshold
+  const softPityStart = Math.floor(threshold * 0.75);
+  if (pity >= softPityStart) {
+    const progressRatio = (pity - softPityStart) / (threshold - softPityStart);
+    // Increase rate up to 10x at threshold
+    const multiplier = 1 + progressRatio * 9;
+    return Math.min(base * multiplier, 99);
+  }
+
+  return base;
+}
+
+/**
+ * Helper: Convert to string
+ */
+function toString(value: CellValue | CellValue[] | undefined): string {
+  if (value === undefined) return '';
+  if (Array.isArray(value)) {
+    return value.length === 1 ? String(value[0]) : '';
+  }
+  return String(value ?? '');
 }

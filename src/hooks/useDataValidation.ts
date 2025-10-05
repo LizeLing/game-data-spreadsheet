@@ -20,8 +20,12 @@ export const useDataValidation = () => {
 
   // Validate cell (DO NOT update state during render!)
   const validateCellData = useCallback(
-    (cell: Cell, columnType?: CellType): ValidationResult => {
-      const result = validateCell(cell, columnType);
+    (
+      cell: Cell,
+      columnType?: CellType,
+      columnOptions?: string[]
+    ): ValidationResult => {
+      const result = validateCell(cell, columnType, columnOptions);
       // ❌ REMOVED: State update during render causes infinite loop
       // setValidationResults((prev) => ({
       //   ...prev,

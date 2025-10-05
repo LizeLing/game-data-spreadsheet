@@ -8,6 +8,14 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    // E2E 테스트를 Vitest 실행에서 제외
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/e2e/**',              // Playwright E2E 테스트 제외
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -18,6 +26,7 @@ export default defineConfig({
         '**/*.config.*',
         '**/mockData',
         'dist/',
+        'e2e/',                  // E2E 파일 커버리지 제외
       ],
     },
   },

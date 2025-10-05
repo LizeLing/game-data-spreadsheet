@@ -10,8 +10,7 @@ import {
   type GameDataTemplateType,
   type GameDataTemplate,
 } from '@utils/gameTemplates';
-import type { Column, Row, Cell } from '@types';
-import { generateCellId } from '@utils/cellUtils';
+import { useGameDataTemplate } from '@hooks/useGameDataTemplate';
 
 interface TemplateInfo {
   type: GameDataTemplateType;
@@ -95,12 +94,13 @@ export const Sidebar = () => {
   const setActiveSheet = useSpreadsheetStore((state) => state.setActiveSheet);
   const renameSheet = useSpreadsheetStore((state) => state.renameSheet);
 
+  const { createSheetFromTemplate } = useGameDataTemplate();
+
   const [editingSheetId, setEditingSheetId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [showTemplateGallery, setShowTemplateGallery] = useState(false);
   const [selectedTemplate, setSelectedTemplate] =
     useState<GameDataTemplateType | null>(null);
-  const [includeSampleData, setIncludeSampleData] = useState(true);
 
   const handleAddSheet = () => {
     addSheet(`Sheet ${sheets.length + 1}`);
@@ -139,12 +139,10 @@ export const Sidebar = () => {
   const handleCreateFromTemplate = () => {
     if (!selectedTemplate) return;
 
-    const template = getTemplate(selectedTemplate);
     const templateInfo = templateInfos.find((t) => t.type === selectedTemplate);
+    if (!templateInfo) return;
 
-    if (!template || !templateInfo) return;
-
-    // Create sheet name
+    // Create sheet name (avoid duplicates)
     const baseName = templateInfo.name;
     let sheetName = baseName;
     let counter = 1;
@@ -154,98 +152,13 @@ export const Sidebar = () => {
       counter++;
     }
 
-    // Create new sheet ID
-    const newSheetId = `sheet-${Date.now()}`;
+    // Create sheet from template using the hook
+    const newSheet = createSheetFromTemplate(selectedTemplate, sheetName);
 
-    // Convert template columns to Sheet columns
-    const columns: Column[] = template.columns.map((col, index) => ({
-      id: col.id,
-      name: col.name,
-      type: col.type,
-      width: col.width || 120,
-      index,
-      frozen: false,
-      hidden: false,
-      validation: col.validation,
-      options: col.options,
-    }));
-
-    // Create rows
-    const rows: Row[] = [];
-
-    // Add sample data if requested
-    if (
-      includeSampleData &&
-      template.sampleData &&
-      template.sampleData.length > 0
-    ) {
-      template.sampleData.forEach((data, rowIndex) => {
-        const rowId = `${newSheetId}-row-${rowIndex}`;
-        const cells: Record<string, Cell> = {};
-
-        columns.forEach((col) => {
-          cells[col.id] = {
-            id: generateCellId(rowId, col.id),
-            rowId,
-            columnId: col.id,
-            value: data[col.id] !== undefined ? data[col.id] : null,
-            type: col.type,
-          };
-        });
-
-        rows.push({
-          id: rowId,
-          index: rowIndex,
-          cells,
-          height: 32,
-          hidden: false,
-        });
-      });
-    }
-
-    // Add empty rows
-    const startIndex = rows.length;
-    const emptyRowCount = template.sampleData ? 50 : 100;
-
-    for (let i = 0; i < emptyRowCount; i++) {
-      const rowId = `${newSheetId}-row-${startIndex + i}`;
-      const cells: Record<string, Cell> = {};
-
-      columns.forEach((col) => {
-        cells[col.id] = {
-          id: generateCellId(rowId, col.id),
-          rowId,
-          columnId: col.id,
-          value: null,
-          type: col.type,
-        };
-      });
-
-      rows.push({
-        id: rowId,
-        index: startIndex + i,
-        cells,
-        height: 32,
-        hidden: false,
-      });
-    }
-
-    // Create the new sheet
-    const newSheet: any = {
-      id: newSheetId,
-      name: sheetName,
-      columns,
-      rows,
-      frozenRows: 0,
-      frozenColumns: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // Add sheet to store using internal state update
+    // Add sheet to store
     useSpreadsheetStore.setState((state) => ({
       sheets: [...state.sheets, newSheet],
-      activeSheetId: newSheetId,
+      activeSheetId: newSheet.id,
     }));
 
     // Close modal and reset
@@ -343,8 +256,6 @@ export const Sidebar = () => {
         <TemplateGallery
           selectedTemplate={selectedTemplate}
           onSelectTemplate={setSelectedTemplate}
-          includeSampleData={includeSampleData}
-          onToggleSampleData={setIncludeSampleData}
           onClose={() => {
             setShowTemplateGallery(false);
             setSelectedTemplate(null);
@@ -360,8 +271,6 @@ export const Sidebar = () => {
 interface TemplateGalleryProps {
   selectedTemplate: GameDataTemplateType | null;
   onSelectTemplate: (type: GameDataTemplateType | null) => void;
-  includeSampleData: boolean;
-  onToggleSampleData: (value: boolean) => void;
   onClose: () => void;
   onCreate: () => void;
 }
@@ -369,8 +278,6 @@ interface TemplateGalleryProps {
 const TemplateGallery = ({
   selectedTemplate,
   onSelectTemplate,
-  includeSampleData,
-  onToggleSampleData,
   onClose,
   onCreate,
 }: TemplateGalleryProps) => {
@@ -419,20 +326,6 @@ const TemplateGallery = ({
                   templateInfos.find((t) => t.type === selectedTemplate)!
                 }
               />
-
-              <div className="mt-6 flex items-center gap-3">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={includeSampleData}
-                    onChange={(e) => onToggleSampleData(e.target.checked)}
-                    className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
-                  />
-                  <span className="text-sm text-gray-700">
-                    샘플 데이터 포함
-                  </span>
-                </label>
-              </div>
             </div>
           )}
         </div>

@@ -325,7 +325,11 @@ const EditableHeaderComponent = (props: IHeaderParams) => {
 
 // Custom Cell Renderer Params Interface
 interface CustomCellRendererParams extends ICellRendererParams {
-  validateCell?: (cell: Cell, columnType?: CellType) => ValidationResult;
+  validateCell?: (
+    cell: Cell,
+    columnType?: CellType,
+    columnOptions?: string[]
+  ) => ValidationResult;
   sheet?: Sheet;
 }
 
@@ -392,25 +396,25 @@ const CustomCellRenderer = (props: CustomCellRendererParams) => {
   let hasWarning = false;
 
   if (props.validateCell && column) {
-    validationResult = props.validateCell(cell, column.type);
+    validationResult = props.validateCell(cell, column.type, column.options);
     hasError = validationResult.errors.length > 0;
     hasWarning = validationResult.warnings.length > 0;
   }
 
-  // Build validation style (using box-shadow to avoid layout issues)
+  // Build validation style (red background for errors)
   let validationStyle: React.CSSProperties = {};
   let tooltipMessage = String(displayValue);
 
   if (hasError) {
     validationStyle = {
-      boxShadow: 'inset 0 0 0 2px #ef4444', // red-500 border using box-shadow
-      backgroundColor: '#fef2f2', // red-50 background
+      backgroundColor: '#fee2e2', // red-100 background
+      color: '#991b1b', // red-900 text
     };
     tooltipMessage = validationResult.errors.map((e) => e.message).join(', ');
   } else if (hasWarning) {
     validationStyle = {
-      boxShadow: 'inset 0 0 0 2px #f59e0b', // yellow-500 border using box-shadow
-      backgroundColor: '#fffbeb', // yellow-50 background
+      backgroundColor: '#fef3c7', // yellow-100 background
+      color: '#92400e', // yellow-900 text
     };
     tooltipMessage = validationResult.warnings.map((w) => w.message).join(', ');
   }
