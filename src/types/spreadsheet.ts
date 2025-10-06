@@ -168,6 +168,12 @@ export interface SelectionRange {
   endColumn: number;
 }
 
+// Multi Selection - 여러 개의 셀 범위를 동시에 선택
+export interface MultiSelection {
+  ranges: SelectionRange[];
+  primary?: SelectionRange; // 주 선택 영역 (포커스된 영역)
+}
+
 // History Entry (for undo/redo)
 export interface HistoryEntry {
   id: string;

@@ -171,20 +171,25 @@ export const Sidebar = () => {
       {/* Sheets section */}
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">시트</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200" id="sheets-heading">시트</h3>
           <button
             onClick={handleAddSheet}
             className="text-xs px-2 py-1 bg-primary-500 dark:bg-primary-600 text-white rounded hover:bg-primary-600 dark:hover:bg-primary-700"
             title="새 시트 추가"
+            aria-label="새 시트 추가"
           >
             + 추가
           </button>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1" role="tablist" aria-labelledby="sheets-heading">
           {sheets.map((sheet) => (
             <div
               key={sheet.id}
+              role="tab"
+              aria-selected={sheet.id === activeSheetId}
+              aria-label={`시트: ${sheet.name}`}
+              tabIndex={sheet.id === activeSheetId ? 0 : -1}
               className={`group relative flex items-center p-2 rounded cursor-pointer transition-colors ${
                 sheet.id === activeSheetId
                   ? 'bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-100'
@@ -198,7 +203,7 @@ export const Sidebar = () => {
                   onChange={(e) => setEditingName(e.target.value)}
                   onBlur={handleFinishRename}
                   onKeyDown={handleKeyDown}
-                  className="flex-1 px-2 py-1 text-sm border border-primary-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="flex-1 px-2 py-1 text-sm border border-primary-300 dark:border-primary-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   autoFocus
                 />
               ) : (
@@ -215,7 +220,7 @@ export const Sidebar = () => {
                         e.stopPropagation();
                         handleStartRename(sheet.id, sheet.name);
                       }}
-                      className="p-1 hover:bg-gray-200 rounded"
+                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
                       title="이름 변경"
                     >
                       ✏️
@@ -226,7 +231,7 @@ export const Sidebar = () => {
                           e.stopPropagation();
                           handleRemoveSheet(sheet.id);
                         }}
-                        className="p-1 hover:bg-red-100 rounded"
+                        className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"
                         title="삭제"
                       >
                         🗑️
@@ -360,20 +365,20 @@ interface TemplateCardProps {
 
 const TemplateCard = ({ template, onClick }: TemplateCardProps) => {
   const colorClasses: Record<string, string> = {
-    blue: 'bg-blue-50 border-blue-200 hover:border-blue-400 hover:bg-blue-100',
+    blue: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30',
     purple:
-      'bg-purple-50 border-purple-200 hover:border-purple-400 hover:bg-purple-100',
+      'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900/30',
     green:
-      'bg-green-50 border-green-200 hover:border-green-400 hover:bg-green-100',
+      'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 hover:border-green-400 dark:hover:border-green-600 hover:bg-green-100 dark:hover:bg-green-900/30',
     yellow:
-      'bg-yellow-50 border-yellow-200 hover:border-yellow-400 hover:bg-yellow-100',
-    red: 'bg-red-50 border-red-200 hover:border-red-400 hover:bg-red-100',
-    teal: 'bg-teal-50 border-teal-200 hover:border-teal-400 hover:bg-teal-100',
-    pink: 'bg-pink-50 border-pink-200 hover:border-pink-400 hover:bg-pink-100',
+      'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 hover:border-yellow-400 dark:hover:border-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
+    red: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 hover:border-red-400 dark:hover:border-red-600 hover:bg-red-100 dark:hover:bg-red-900/30',
+    teal: 'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:bg-teal-100 dark:hover:bg-teal-900/30',
+    pink: 'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800 hover:border-pink-400 dark:hover:border-pink-600 hover:bg-pink-100 dark:hover:bg-pink-900/30',
     indigo:
-      'bg-indigo-50 border-indigo-200 hover:border-indigo-400 hover:bg-indigo-100',
+      'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-900/30',
     orange:
-      'bg-orange-50 border-orange-200 hover:border-orange-400 hover:bg-orange-100',
+      'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 hover:border-orange-400 dark:hover:border-orange-600 hover:bg-orange-100 dark:hover:bg-orange-900/30',
   };
 
   return (

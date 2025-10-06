@@ -187,6 +187,7 @@ interface SpreadsheetState {
   sheets: Sheet[];
   activeSheetId: string;
   selection: SelectionRange | null;
+  multiSelection: SelectionRange[]; // 다중 선택 영역들
   history: HistoryEntry[];
   historyIndex: number;
 
@@ -240,6 +241,10 @@ interface SpreadsheetState {
     selection: SelectionRange,
     style: Partial<CellStyle>
   ) => void;
+  applyStyleToMultiSelection: (
+    sheetId: string,
+    style: Partial<CellStyle>
+  ) => void;
   updateCellStyle: (
     sheetId: string,
     rowId: string,
@@ -259,6 +264,11 @@ interface SpreadsheetState {
   // Selection
   setSelection: (range: SelectionRange | null) => void;
   clearSelection: () => void;
+  setMultiSelection: (ranges: SelectionRange[]) => void;
+  addSelectionRange: (range: SelectionRange) => void;
+  removeSelectionRange: (index: number) => void;
+  clearMultiSelection: () => void;
+  getAllSelectedRanges: () => SelectionRange[]; // selection + multiSelection 통합
 
   // Cell merging
   mergeCells: (sheetId: string, selection: SelectionRange) => void;
@@ -364,6 +374,7 @@ export const useSpreadsheetStore = create<SpreadsheetState>()(
     sheets: [createDefaultSheet('sheet-1', 'Sheet 1')],
     activeSheetId: 'sheet-1',
     selection: null,
+    multiSelection: [],
     history: [],
     historyIndex: -1,
 
@@ -816,6 +827,48 @@ export const useSpreadsheetStore = create<SpreadsheetState>()(
       get()._triggerAutoSave();
     },
 
+    applyStyleToMultiSelection: (sheetId, style) => {
+      const ranges = get().getAllSelectedRanges();
+
+      set((state) => {
+        const sheet = state.sheets.find((s) => s.id === sheetId);
+        if (!sheet) return;
+
+        // Apply style to all cells in all selected ranges
+        ranges.forEach((selection) => {
+          for (
+            let rowIndex = selection.startRow;
+            rowIndex <= selection.endRow;
+            rowIndex++
+          ) {
+            const row = sheet.rows[rowIndex];
+            if (!row) continue;
+
+            for (
+              let colIndex = selection.startColumn;
+              colIndex <= selection.endColumn;
+              colIndex++
+            ) {
+              const column = sheet.columns[colIndex];
+              if (!column) continue;
+
+              const cell = row.cells[column.id];
+              if (cell) {
+                cell.style = {
+                  ...cell.style,
+                  ...style,
+                };
+              }
+            }
+          }
+        });
+
+        sheet.updatedAt = new Date();
+        state.hasUnsavedChanges = true;
+      });
+      get()._triggerAutoSave();
+    },
+
     updateCellStyle: (sheetId, rowId, columnId, style) => {
       set((state) => {
         const sheet = state.sheets.find((s) => s.id === sheetId);
@@ -893,6 +946,43 @@ export const useSpreadsheetStore = create<SpreadsheetState>()(
       set((state) => {
         state.selection = null;
       }),
+
+    setMultiSelection: (ranges) =>
+      set((state) => {
+        state.multiSelection = ranges;
+      }),
+
+    addSelectionRange: (range) =>
+      set((state) => {
+        state.multiSelection.push(range);
+      }),
+
+    removeSelectionRange: (index) =>
+      set((state) => {
+        if (index >= 0 && index < state.multiSelection.length) {
+          state.multiSelection.splice(index, 1);
+        }
+      }),
+
+    clearMultiSelection: () =>
+      set((state) => {
+        state.multiSelection = [];
+      }),
+
+    getAllSelectedRanges: () => {
+      const state = get();
+      const ranges: SelectionRange[] = [];
+
+      // 주 선택 영역 추가
+      if (state.selection) {
+        ranges.push(state.selection);
+      }
+
+      // 다중 선택 영역들 추가
+      ranges.push(...state.multiSelection);
+
+      return ranges;
+    },
 
     // Cell merging
     mergeCells: (sheetId, selection) =>

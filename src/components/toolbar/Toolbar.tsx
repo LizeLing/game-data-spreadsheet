@@ -32,6 +32,8 @@ export const Toolbar = () => {
   const activeSheetId = useSpreadsheetStore((state) => state.activeSheetId);
   const sheets = useSpreadsheetStore((state) => state.sheets);
   const selection = useSpreadsheetStore((state) => state.selection);
+  const multiSelection = useSpreadsheetStore((state) => state.multiSelection);
+  const getAllSelectedRanges = useSpreadsheetStore((state) => state.getAllSelectedRanges);
   const addRow = useSpreadsheetStore((state) => state.addRow);
   const addColumn = useSpreadsheetStore((state) => state.addColumn);
   const addSheets = useSpreadsheetStore((state) => state.addSheets);
@@ -40,6 +42,7 @@ export const Toolbar = () => {
   const saveSpreadsheet = useSpreadsheetStore((state) => state.saveSpreadsheet);
   const saving = useSpreadsheetStore((state) => state.saving);
   const applyCellStyle = useSpreadsheetStore((state) => state.applyCellStyle);
+  const applyStyleToMultiSelection = useSpreadsheetStore((state) => state.applyStyleToMultiSelection);
   const filterSheet = useSpreadsheetStore((state) => state.filterSheet);
   const clearFilters = useSpreadsheetStore((state) => state.clearFilters);
   const mergeCells = useSpreadsheetStore((state) => state.mergeCells);
@@ -252,36 +255,67 @@ export const Toolbar = () => {
     exportSheet(activeSheet, activeSheet.name, exportFormat);
   };
 
-  // Formatting handlers
+  // Formatting handlers (다중 선택 지원)
   const handleBold = () => {
     if (!selection) return;
     const currentWeight = 'bold'; // Toggle logic can be added
-    applyCellStyle(activeSheetId, selection, { fontWeight: currentWeight });
+
+    // 다중 선택이 있으면 모든 선택 영역에 적용
+    if (multiSelection.length > 0) {
+      applyStyleToMultiSelection(activeSheetId, { fontWeight: currentWeight });
+    } else {
+      applyCellStyle(activeSheetId, selection, { fontWeight: currentWeight });
+    }
   };
 
   const handleItalic = () => {
     if (!selection) return;
-    applyCellStyle(activeSheetId, selection, { fontStyle: 'italic' });
+
+    if (multiSelection.length > 0) {
+      applyStyleToMultiSelection(activeSheetId, { fontStyle: 'italic' });
+    } else {
+      applyCellStyle(activeSheetId, selection, { fontStyle: 'italic' });
+    }
   };
 
   const handleUnderline = () => {
     if (!selection) return;
-    applyCellStyle(activeSheetId, selection, { textDecoration: 'underline' });
+
+    if (multiSelection.length > 0) {
+      applyStyleToMultiSelection(activeSheetId, { textDecoration: 'underline' });
+    } else {
+      applyCellStyle(activeSheetId, selection, { textDecoration: 'underline' });
+    }
   };
 
   const handleTextColor = (color: string) => {
     if (!selection) return;
-    applyCellStyle(activeSheetId, selection, { color });
+
+    if (multiSelection.length > 0) {
+      applyStyleToMultiSelection(activeSheetId, { color });
+    } else {
+      applyCellStyle(activeSheetId, selection, { color });
+    }
   };
 
   const handleBackgroundColor = (color: string) => {
     if (!selection) return;
-    applyCellStyle(activeSheetId, selection, { backgroundColor: color });
+
+    if (multiSelection.length > 0) {
+      applyStyleToMultiSelection(activeSheetId, { backgroundColor: color });
+    } else {
+      applyCellStyle(activeSheetId, selection, { backgroundColor: color });
+    }
   };
 
   const handleTextAlign = (align: 'left' | 'center' | 'right') => {
     if (!selection) return;
-    applyCellStyle(activeSheetId, selection, { textAlign: align });
+
+    if (multiSelection.length > 0) {
+      applyStyleToMultiSelection(activeSheetId, { textAlign: align });
+    } else {
+      applyCellStyle(activeSheetId, selection, { textAlign: align });
+    }
   };
 
   // Cell merging handlers
@@ -319,269 +353,243 @@ export const Toolbar = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
-      <div className="flex items-center gap-2">
+    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-1.5 overflow-x-auto">
+      <div className="flex items-center gap-1 min-w-max">
         {/* File operations */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton onClick={() => console.log('New')} title="새로 만들기">
-            <span className="text-sm">📄</span>
-          </ToolbarButton>
-          <ToolbarButton onClick={() => console.log('Open')} title="열기">
-            <span className="text-sm">📂</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={handleSave}
-            title="저장 (Ctrl+S)"
-            disabled={saving}
-          >
-            <span className="text-sm">{saving ? '⏳' : '💾'}</span>
-          </ToolbarButton>
-        </div>
+        <ToolbarButton
+          onClick={handleSave}
+          title="저장 (Ctrl+S)"
+          disabled={saving}
+        >
+          <span className="text-sm">{saving ? '⏳' : '💿'}</span>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
         {/* Edit operations */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton onClick={handleUndo} title="실행 취소 (Ctrl+Z)">
-            <span className="text-sm">↶</span>
-          </ToolbarButton>
-          <ToolbarButton onClick={handleRedo} title="다시 실행 (Ctrl+Y)">
-            <span className="text-sm">↷</span>
-          </ToolbarButton>
-        </div>
+        <ToolbarButton onClick={handleUndo} title="실행 취소 (Ctrl+Z)">
+          <span className="text-sm">↶</span>
+        </ToolbarButton>
+        <ToolbarButton onClick={handleRedo} title="다시 실행 (Ctrl+Y)">
+          <span className="text-sm">↷</span>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
         {/* Insert/Delete operations */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton
-            onClick={handleAddRow}
-            title={selection ? '선택 위치 다음에 행 삽입' : '행 추가'}
-          >
-            <span className="text-sm">➕ 행</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={handleDeleteRow}
-            title="선택한 행 삭제"
-            disabled={!selection}
-          >
-            <span className="text-sm">➖ 행</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={handleAddColumn}
-            title={selection ? '선택 위치 다음에 열 삽입' : '열 추가'}
-          >
-            <span className="text-sm">➕ 열</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={handleDeleteColumn}
-            title="선택한 열 삭제"
-            disabled={!selection}
-          >
-            <span className="text-sm">➖ 열</span>
-          </ToolbarButton>
-        </div>
+        <ToolbarButton
+          onClick={handleAddRow}
+          title={selection ? '선택 위치 다음에 행 삽입' : '행 추가'}
+        >
+          <span className="text-sm">➕행</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={handleDeleteRow}
+          title="선택한 행 삭제"
+          disabled={!selection}
+        >
+          <span className="text-sm">➖행</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={handleAddColumn}
+          title={selection ? '선택 위치 다음에 열 삽입' : '열 추가'}
+        >
+          <span className="text-sm">➕열</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={handleDeleteColumn}
+          title="선택한 열 삭제"
+          disabled={!selection}
+        >
+          <span className="text-sm">➖열</span>
+        </ToolbarButton>
 
-        {/* Search and Filter operations */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton
-            onClick={() => setShowSearchDialog(true)}
-            title="찾기 및 바꾸기 (Ctrl+F)"
-            disabled={!activeSheet}
-          >
-            <span className="text-sm">🔎 찾기</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => setShowFilterDialog(true)}
-            title="데이터 필터"
-            disabled={!activeSheet}
-          >
-            <span className="text-sm">🔍 필터</span>
-          </ToolbarButton>
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Format operations */}
+        <ToolbarButton
+          onClick={handleBold}
+          title="굵게 (Ctrl+B)"
+          disabled={!selection}
+        >
+          <span className="font-bold text-sm">B</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={handleItalic}
+          title="기울임 (Ctrl+I)"
+          disabled={!selection}
+        >
+          <span className="italic text-sm">I</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={handleUnderline}
+          title="밑줄 (Ctrl+U)"
+          disabled={!selection}
+        >
+          <span className="underline text-sm">U</span>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Color operations */}
+        <input
+          type="color"
+          onChange={(e) => handleTextColor(e.target.value)}
+          title="글자 색"
+          disabled={!selection}
+          className="w-6 h-6 rounded border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+        <input
+          type="color"
+          onChange={(e) => handleBackgroundColor(e.target.value)}
+          title="배경색"
+          disabled={!selection}
+          className="w-6 h-6 rounded border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Alignment operations */}
+        <ToolbarButton
+          onClick={() => handleTextAlign('left')}
+          title="왼쪽 정렬"
+          disabled={!selection}
+        >
+          <span className="text-sm">⬅</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => handleTextAlign('center')}
+          title="가운데 정렬"
+          disabled={!selection}
+        >
+          <span className="text-sm">⬌</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => handleTextAlign('right')}
+          title="오른쪽 정렬"
+          disabled={!selection}
+        >
+          <span className="text-sm">➡</span>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Cell merging */}
+        <ToolbarButton
+          onClick={handleMergeCells}
+          title="셀 병합"
+          disabled={!selection || !!hasMergedCell}
+        >
+          <span className="text-sm">⬜</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={handleUnmergeCells}
+          title="병합 해제"
+          disabled={!hasMergedCell}
+        >
+          <span className="text-sm">⬛</span>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Advanced features */}
+        <ToolbarButton
+          onClick={() => setShowSearchDialog(true)}
+          title="찾기 및 바꾸기 (Ctrl+F)"
+          disabled={!activeSheet}
+        >
+          <span className="text-sm">🔎</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => setShowFilterDialog(true)}
+          title="데이터 필터"
+          disabled={!activeSheet}
+        >
+          <span className="text-sm">🔍</span>
           {activeSheet?.filters && activeSheet.filters.length > 0 && (
-            <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">
+            <span className="absolute -top-1 -right-1 text-xs bg-blue-500 text-white px-1 rounded-full">
               {activeSheet.filters.length}
             </span>
           )}
-        </div>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => setShowValidationPanel(true)}
+          title="데이터 검증"
+          disabled={!activeSheet}
+        >
+          <span className="text-sm">✓</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => setShowConditionalFormatDialog(true)}
+          title="조건부 서식"
+          disabled={!activeSheet}
+        >
+          <span className="text-sm">🎨</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => setShowAdvancedFormatDialog(true)}
+          title="고급 서식"
+          disabled={!selection}
+        >
+          <span className="text-sm">⚙️</span>
+        </ToolbarButton>
 
-        {/* Validation operations */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton
-            onClick={() => setShowValidationPanel(true)}
-            title="데이터 검증 (Ctrl+Shift+V)"
-            disabled={!activeSheet}
-          >
-            <span className="text-sm">✓ 검증</span>
-          </ToolbarButton>
-        </div>
-
-        {/* Conditional Formatting */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton
-            onClick={() => setShowConditionalFormatDialog(true)}
-            title="조건부 서식"
-            disabled={!activeSheet}
-          >
-            <span className="text-sm">🎨 조건부</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => setShowAdvancedFormatDialog(true)}
-            title="고급 서식 (테두리, 폰트, 숫자 포맷)"
-            disabled={!selection}
-          >
-            <span className="text-sm">⚙️ 고급</span>
-          </ToolbarButton>
-        </div>
-
-        {/* Format operations */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton
-            onClick={handleBold}
-            title="굵게 (Ctrl+B)"
-            disabled={!selection}
-          >
-            <span className="font-bold text-sm">B</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={handleItalic}
-            title="기울임 (Ctrl+I)"
-            disabled={!selection}
-          >
-            <span className="italic text-sm">I</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={handleUnderline}
-            title="밑줄 (Ctrl+U)"
-            disabled={!selection}
-          >
-            <span className="underline text-sm">U</span>
-          </ToolbarButton>
-        </div>
-
-        {/* Color operations */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <input
-            type="color"
-            onChange={(e) => handleTextColor(e.target.value)}
-            title="글자 색"
-            disabled={!selection}
-            className="w-8 h-8 rounded border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <input
-            type="color"
-            onChange={(e) => handleBackgroundColor(e.target.value)}
-            title="배경색"
-            disabled={!selection}
-            className="w-8 h-8 rounded border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        </div>
-
-        {/* Alignment operations */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton
-            onClick={() => handleTextAlign('left')}
-            title="왼쪽 정렬"
-            disabled={!selection}
-          >
-            <span className="text-sm">⬅</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => handleTextAlign('center')}
-            title="가운데 정렬"
-            disabled={!selection}
-          >
-            <span className="text-sm">⬌</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => handleTextAlign('right')}
-            title="오른쪽 정렬"
-            disabled={!selection}
-          >
-            <span className="text-sm">➡</span>
-          </ToolbarButton>
-        </div>
-
-        {/* Cell merging operations */}
-        <div className="flex items-center gap-1">
-          <ToolbarButton
-            onClick={handleMergeCells}
-            title="셀 병합"
-            disabled={!selection || !!hasMergedCell}
-          >
-            <span className="text-sm">⬜ 병합</span>
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={handleUnmergeCells}
-            title="병합 해제"
-            disabled={!hasMergedCell}
-          >
-            <span className="text-sm">⬜ 해제</span>
-          </ToolbarButton>
-        </div>
-
-        {/* Spacer */}
-        <div className="flex-1" />
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
         {/* Import/Export */}
-        <div className="flex items-center gap-1">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv,.json,.xlsx,.xls"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          <ToolbarButton onClick={handleImport} title="CSV/JSON/XLSX 가져오기">
-            <span className="text-sm">📥 가져오기</span>
-          </ToolbarButton>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.json,.xlsx,.xls"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <ToolbarButton onClick={handleImport} title="가져오기">
+          <span className="text-sm">📂</span>
+        </ToolbarButton>
 
-          <select
-            value={exportFormat}
-            onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
-            className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            title="내보내기 형식"
-          >
-            <option value="csv">CSV</option>
-            <option value="json">JSON</option>
-            <option value="xlsx">Excel (.xlsx)</option>
-          </select>
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-          <ToolbarButton
-            onClick={handleExport}
-            title={`${exportFormat.toUpperCase()}로 내보내기`}
-            disabled={!activeSheet}
-          >
-            <span className="text-sm">📤 내보내기</span>
-          </ToolbarButton>
-        </div>
+        <select
+          value={exportFormat}
+          onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
+          className="px-1.5 py-0.5 text-xs border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          title="내보내기 형식"
+        >
+          <option value="csv">CSV</option>
+          <option value="json">JSON</option>
+          <option value="xlsx">XLSX</option>
+        </select>
+        <ToolbarButton
+          onClick={handleExport}
+          title={`${exportFormat.toUpperCase()}로 내보내기`}
+          disabled={!activeSheet}
+        >
+          <span className="text-sm">💾</span>
+        </ToolbarButton>
 
-        {/* Chart */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton
-            onClick={() => setShowChartDialog(true)}
-            title="차트 생성"
-            disabled={!selection}
-          >
-            <span className="text-sm">📊</span>
-          </ToolbarButton>
-        </div>
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-        {/* Theme Toggle */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-          <ToolbarButton
-            onClick={toggleTheme}
-            title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
-          >
-            <span className="text-sm">{theme === 'dark' ? '☀️' : '🌙'}</span>
-          </ToolbarButton>
-        </div>
-
-        {/* Help */}
-        <div className="flex items-center gap-1">
-          <ToolbarButton
-            onClick={() => setShowShortcutHelp(true)}
-            title="단축키 도움말 (Ctrl+/)"
-          >
-            <span className="text-sm">❓</span>
-          </ToolbarButton>
-        </div>
+        {/* Utility */}
+        <ToolbarButton
+          onClick={() => setShowChartDialog(true)}
+          title="차트 생성"
+          disabled={!selection}
+        >
+          <span className="text-sm">📊</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={toggleTheme}
+          title={theme === 'dark' ? '라이트 모드' : '다크 모드'}
+        >
+          <span className="text-sm">{theme === 'dark' ? '☀️' : '🌙'}</span>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => setShowShortcutHelp(true)}
+          title="단축키 도움말 (Ctrl+/)"
+        >
+          <span className="text-sm">❓</span>
+        </ToolbarButton>
       </div>
 
       {/* Search Dialog */}
@@ -663,7 +671,9 @@ const ToolbarButton = ({
       onClick={onClick}
       title={title}
       disabled={disabled}
-      className="px-3 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      aria-label={title}
+      aria-disabled={disabled}
+      className="relative px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-900 dark:text-gray-100"
     >
       {children}
     </button>

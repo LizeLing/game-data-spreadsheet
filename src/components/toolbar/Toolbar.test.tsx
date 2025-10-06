@@ -81,7 +81,6 @@ describe('Toolbar', () => {
     render(<Toolbar />);
 
     // File operations
-    expect(screen.getByTitle(/새로 만들기/i)).toBeInTheDocument();
     expect(screen.getByTitle(/저장/i)).toBeInTheDocument();
 
     // Edit operations

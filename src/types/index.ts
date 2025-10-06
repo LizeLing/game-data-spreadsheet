@@ -15,6 +15,7 @@ export type {
   Sheet,
   Spreadsheet,
   SelectionRange,
+  MultiSelection,
   HistoryEntry,
   SortConfig,
   FilterConfig,

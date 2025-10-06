@@ -241,9 +241,7 @@ describe('SpreadsheetGrid', () => {
       const agGridProps = (global as any).__agGridProps;
 
       expect(agGridProps.animateRows).toBe(true);
-      expect(agGridProps.rowSelection).toBe('multiple');
       expect(agGridProps.enableRangeSelection).toBe(true);
-      expect(agGridProps.suppressRowClickSelection).toBe(true);
     });
   });
 
@@ -591,10 +589,15 @@ describe('SpreadsheetGrid', () => {
             index: 0,
             hidden: false,
             cells: {
-              'col-A': createMockCell('row-0', 'col-A', null, 'text'),
-              'col-B': createMockCell('row-0', 'col-B', undefined, 'number'),
+              'col-A': createMockCell('row-0', 'col-A', 'test', 'text'), // 하나의 값이 있어야 행이 표시됨
+              'col-B': createMockCell('row-0', 'col-B', null, 'number'),
+              'col-C': createMockCell('row-0', 'col-C', undefined, 'number'),
             },
           },
+        ],
+        columns: [
+          ...mockSheet.columns,
+          { id: 'col-C', name: 'Column C', type: 'number', index: 2 },
         ],
       };
 
@@ -611,8 +614,9 @@ describe('SpreadsheetGrid', () => {
       render(<SpreadsheetGrid />);
 
       const agGridProps = (global as any).__agGridProps;
-      expect(agGridProps.rowData[0]['col-A']).toBe(null);
-      expect(agGridProps.rowData[0]['col-B']).toBe(undefined);
+      expect(agGridProps.rowData[0]['col-A']).toBe('test');
+      expect(agGridProps.rowData[0]['col-B']).toBe(null);
+      expect(agGridProps.rowData[0]['col-C']).toBe(undefined);
     });
 
     it('should handle cell update with missing field', () => {
@@ -661,18 +665,11 @@ describe('SpreadsheetGrid', () => {
       expect(agGridProps.enableCellTextSelection).toBe(true);
     });
 
-    it('should set row selection to multiple', () => {
+    it('should not enable row selection', () => {
       render(<SpreadsheetGrid />);
       const agGridProps = (global as any).__agGridProps;
 
-      expect(agGridProps.rowSelection).toBe('multiple');
-    });
-
-    it('should suppress row click selection', () => {
-      render(<SpreadsheetGrid />);
-      const agGridProps = (global as any).__agGridProps;
-
-      expect(agGridProps.suppressRowClickSelection).toBe(true);
+      expect(agGridProps.rowSelection).toBeUndefined();
     });
 
     it('should enable row animations', () => {

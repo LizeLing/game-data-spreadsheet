@@ -175,6 +175,7 @@ const EditableHeaderComponent = (props: IHeaderParams) => {
   const typeInfo = typeConfig[currentType];
 
   if (isEditing) {
+    const isDark = document.documentElement.classList.contains('dark');
     return (
       <div
         style={{
@@ -194,15 +195,19 @@ const EditableHeaderComponent = (props: IHeaderParams) => {
           style={{
             width: '100%',
             padding: '2px 4px',
-            border: '2px solid #1976d2',
+            border: `2px solid ${isDark ? '#60a5fa' : '#1976d2'}`,
             borderRadius: '2px',
             fontSize: '13px',
             outline: 'none',
+            backgroundColor: isDark ? '#1f2937' : '#ffffff',
+            color: isDark ? '#e5e7eb' : '#000000',
           }}
         />
       </div>
     );
   }
+
+  const isDark = document.documentElement.classList.contains('dark');
 
   return (
     <div
@@ -250,7 +255,9 @@ const EditableHeaderComponent = (props: IHeaderParams) => {
           cursor: 'pointer',
           fontSize: '11px',
           borderRadius: '3px',
-          backgroundColor: showTypeMenu ? '#e3f2fd' : 'transparent',
+          backgroundColor: showTypeMenu
+            ? (isDark ? '#1e3a8a' : '#e3f2fd')
+            : 'transparent',
           border: 'none',
           outline: 'none',
           zIndex: 10,
@@ -269,10 +276,12 @@ const EditableHeaderComponent = (props: IHeaderParams) => {
               position: 'fixed',
               top: `${menuPosition.top}px`,
               left: `${menuPosition.left}px`,
-              backgroundColor: 'white',
-              border: '1px solid #ccc',
+              backgroundColor: isDark ? '#1f2937' : 'white',
+              border: `1px solid ${isDark ? '#374151' : '#ccc'}`,
               borderRadius: '4px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              boxShadow: isDark
+                ? '0 2px 8px rgba(0,0,0,0.5)'
+                : '0 2px 8px rgba(0,0,0,0.15)',
               zIndex: 10000,
               minWidth: '120px',
             }}
@@ -300,12 +309,15 @@ const EditableHeaderComponent = (props: IHeaderParams) => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  backgroundColor: type === currentType ? '#e3f2fd' : 'transparent',
-                  borderBottom: '1px solid #f0f0f0',
+                  backgroundColor: type === currentType
+                    ? (isDark ? '#1e3a8a' : '#e3f2fd')
+                    : 'transparent',
+                  borderBottom: `1px solid ${isDark ? '#374151' : '#f0f0f0'}`,
+                  color: isDark ? '#e5e7eb' : '#000000',
                 }}
                 onMouseEnter={(e) => {
                   if (type !== currentType) {
-                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                    e.currentTarget.style.backgroundColor = isDark ? '#374151' : '#f5f5f5';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -468,8 +480,10 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
   const activeSheetId = useSpreadsheetStore((state) => state.activeSheetId);
   const sheets = useSpreadsheetStore((state) => state.sheets);
   const selection = useSpreadsheetStore((state) => state.selection);
+  const multiSelection = useSpreadsheetStore((state) => state.multiSelection);
   const updateCell = useSpreadsheetStore((state) => state.updateCell);
   const setSelection = useSpreadsheetStore((state) => state.setSelection);
+  const setMultiSelection = useSpreadsheetStore((state) => state.setMultiSelection);
   const copySelection = useSpreadsheetStore((state) => state.copySelection);
   const cutSelection = useSpreadsheetStore((state) => state.cutSelection);
   const pasteFromClipboard = useSpreadsheetStore(
@@ -532,13 +546,33 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
   const rowData = useMemo(() => {
     if (!sheet) return [];
 
-    return sheet.rows.map((row) => {
-      const rowObj: Record<string, any> = { _rowId: row.id };
-      Object.entries(row.cells).forEach(([colId, cell]) => {
-        rowObj[colId] = cell.value;
+    return sheet.rows
+      .filter((row, index) => {
+        // 행의 모든 셀이 비어있는지 확인
+        const hasValue = Object.values(row.cells).some((cell) => {
+          const value = cell.value;
+          return value !== null && value !== undefined && value !== '';
+        });
+
+        // 값이 있는 행은 항상 표시
+        if (hasValue) return true;
+
+        // 처음 10개 행은 비어있어도 표시 (사용자 편의)
+        if (index < 10) return true;
+
+        // 마지막 행은 비어있어도 표시 (사용자가 데이터를 입력할 수 있도록)
+        if (index === sheet.rows.length - 1) return true;
+
+        // 그 외 빈 행은 숨김
+        return false;
+      })
+      .map((row) => {
+        const rowObj: Record<string, any> = { _rowId: row.id };
+        Object.entries(row.cells).forEach(([colId, cell]) => {
+          rowObj[colId] = cell.value;
+        });
+        return rowObj;
       });
-      return rowObj;
-    });
   }, [sheet]);
 
   // Handle cell value changes
@@ -582,7 +616,7 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
     [sheet, setSelection]
   );
 
-  // Handle range selection
+  // Handle range selection (다중 선택 지원)
   const onRangeSelectionChanged = useCallback(() => {
     const gridApi = gridRef.current?.api;
     if (!gridApi || !sheet) return;
@@ -593,32 +627,45 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
       return;
     }
 
-    // Get the first range (primary selection)
-    const range = cellRanges[0];
-    const startRow = Math.min(
-      range.startRow?.rowIndex ?? 0,
-      range.endRow?.rowIndex ?? 0
-    );
-    const endRow = Math.max(
-      range.startRow?.rowIndex ?? 0,
-      range.endRow?.rowIndex ?? 0
-    );
+    // 다중 범위 처리
+    const ranges = cellRanges.map((range) => {
+      const startRow = Math.min(
+        range.startRow?.rowIndex ?? 0,
+        range.endRow?.rowIndex ?? 0
+      );
+      const endRow = Math.max(
+        range.startRow?.rowIndex ?? 0,
+        range.endRow?.rowIndex ?? 0
+      );
 
-    const columns = range.columns || [];
-    const startCol = sheet.columns.findIndex(
-      (col) => col.id === columns[0]?.getColId()
-    );
-    const endCol = sheet.columns.findIndex(
-      (col) => col.id === columns[columns.length - 1]?.getColId()
-    );
+      const columns = range.columns || [];
+      const startCol = sheet.columns.findIndex(
+        (col) => col.id === columns[0]?.getColId()
+      );
+      const endCol = sheet.columns.findIndex(
+        (col) => col.id === columns[columns.length - 1]?.getColId()
+      );
 
-    setSelection({
-      startRow,
-      endRow,
-      startColumn: startCol >= 0 ? startCol : 0,
-      endColumn: endCol >= 0 ? endCol : 0,
+      return {
+        startRow,
+        endRow,
+        startColumn: startCol >= 0 ? startCol : 0,
+        endColumn: endCol >= 0 ? endCol : 0,
+      };
     });
-  }, [sheet, setSelection]);
+
+    // 첫 번째 범위를 주 선택 영역으로 설정
+    if (ranges.length > 0) {
+      setSelection(ranges[0]);
+
+      // 나머지 범위들을 multiSelection으로 설정
+      if (ranges.length > 1) {
+        setMultiSelection(ranges.slice(1));
+      } else {
+        setMultiSelection([]);
+      }
+    }
+  }, [sheet, setSelection, setMultiSelection]);
 
   // Handle cell context menu (right-click)
   const onCellContextMenu = useCallback(
@@ -885,9 +932,7 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
           resizable: true,
         }}
         animateRows={true}
-        rowSelection="multiple"
         enableRangeSelection={true}
-        suppressRowClickSelection={true}
         suppressCellFocus={false}
         enableCellTextSelection={true}
         ensureDomOrder={true}
