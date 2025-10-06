@@ -29,20 +29,20 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="flex flex-col h-screen bg-gray-100">
+      <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
         {/* Header */}
-        <header className="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-3 shadow-md">
+        <header className="bg-gradient-to-r from-primary-600 to-primary-700 dark:from-gray-800 dark:to-gray-900 text-white px-6 py-3 shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">게임 데이터 스프레드시트</h1>
-              <p className="text-sm text-primary-100">
+              <p className="text-sm text-primary-100 dark:text-gray-300">
                 빠르고 효율적인 게임 데이터 관리
               </p>
             </div>
             <div className="text-right text-sm">
-              {saving && <div className="text-primary-200">저장 중...</div>}
+              {saving && <div className="text-primary-200 dark:text-gray-300">저장 중...</div>}
               {!saving && lastSaved && (
-                <div className="text-primary-200">
+                <div className="text-primary-200 dark:text-gray-300">
                   마지막 저장: {lastSaved.toLocaleTimeString()}
                 </div>
               )}
@@ -62,7 +62,7 @@ function App() {
           <Sidebar />
 
           {/* Grid area */}
-          <main className="flex-1 flex flex-col overflow-hidden bg-white">
+          <main className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-gray-800">
             {/* Formula Bar */}
             <FormulaBar />
 
@@ -74,7 +74,7 @@ function App() {
         </div>
 
         {/* Footer */}
-        <footer className="bg-gray-800 text-gray-300 px-6 py-2 text-xs">
+        <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 dark:text-gray-400 px-6 py-2 text-xs">
           <div className="flex justify-between items-center">
             <span>© 2025 게임 데이터 스프레드시트</span>
             <span>Ctrl+/ 키를 눌러 단축키 보기</span>

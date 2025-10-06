@@ -167,14 +167,14 @@ export const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+    <div className="w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
       {/* Sheets section */}
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-700">시트</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">시트</h3>
           <button
             onClick={handleAddSheet}
-            className="text-xs px-2 py-1 bg-primary-500 text-white rounded hover:bg-primary-600"
+            className="text-xs px-2 py-1 bg-primary-500 dark:bg-primary-600 text-white rounded hover:bg-primary-600 dark:hover:bg-primary-700"
             title="새 시트 추가"
           >
             + 추가
@@ -187,8 +187,8 @@ export const Sidebar = () => {
               key={sheet.id}
               className={`group relative flex items-center p-2 rounded cursor-pointer transition-colors ${
                 sheet.id === activeSheetId
-                  ? 'bg-primary-100 text-primary-800'
-                  : 'hover:bg-gray-100 text-gray-700'
+                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-100'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200'
               }`}
             >
               {editingSheetId === sheet.id ? (

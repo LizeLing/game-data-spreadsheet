@@ -7,6 +7,7 @@ import { useRef, useState, useMemo } from 'react';
 import { useSpreadsheetStore } from '@stores/spreadsheetStore';
 import { useImportExport, type ExportFormat } from '@hooks/useImportExport';
 import { useKeyboardShortcuts, type KeyboardShortcut } from '@hooks/useKeyboardShortcuts';
+import { useTheme } from '@hooks/useTheme';
 import type { FilterConfig, Sheet } from '@types';
 import { SearchDialog } from '../dialogs/SearchDialog';
 import { ValidationPanel } from '../dialogs/ValidationPanel';
@@ -45,6 +46,7 @@ export const Toolbar = () => {
   const removeRow = useSpreadsheetStore((state) => state.removeRow);
   const removeColumn = useSpreadsheetStore((state) => state.removeColumn);
   const { importFile, exportSheet } = useImportExport();
+  const { theme, toggleTheme } = useTheme();
 
   const activeSheet = sheets.find((s) => s.id === activeSheetId);
 
@@ -315,7 +317,7 @@ export const Toolbar = () => {
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-2">
+    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
       <div className="flex items-center gap-2">
         {/* File operations */}
         <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
@@ -548,6 +550,16 @@ export const Toolbar = () => {
           </ToolbarButton>
         </div>
 
+        {/* Theme Toggle */}
+        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+          <ToolbarButton
+            onClick={toggleTheme}
+            title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
+          >
+            <span className="text-sm">{theme === 'dark' ? '☀️' : '🌙'}</span>
+          </ToolbarButton>
+        </div>
+
         {/* Help */}
         <div className="flex items-center gap-1">
           <ToolbarButton
@@ -629,7 +641,7 @@ const ToolbarButton = ({
       onClick={onClick}
       title={title}
       disabled={disabled}
-      className="px-3 py-1.5 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      className="px-3 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
     >
       {children}
     </button>
