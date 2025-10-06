@@ -102,21 +102,21 @@ export const AdvancedFormatDialog = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-[700px] max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">고급 서식</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[700px] max-h-[80vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">고급 서식</h2>
 
         {/* Font Section */}
         <div className="mb-6">
-          <h3 className="text-sm font-semibold mb-3">폰트</h3>
+          <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">폰트</h3>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-gray-600 mb-1">
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
                 폰트 패밀리
               </label>
               <select
                 value={style.fontFamily}
                 onChange={(e) => setStyle({ ...style, fontFamily: e.target.value })}
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 {FONT_FAMILIES.map((font) => (
                   <option key={font} value={font} style={{ fontFamily: font }}>
@@ -127,13 +127,13 @@ export const AdvancedFormatDialog = ({
             </div>
 
             <div>
-              <label className="block text-xs text-gray-600 mb-1">크기</label>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">크기</label>
               <select
                 value={style.fontSize}
                 onChange={(e) =>
                   setStyle({ ...style, fontSize: Number(e.target.value) })
                 }
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 {FONT_SIZES.map((size) => (
                   <option key={size} value={size}>
@@ -144,7 +144,7 @@ export const AdvancedFormatDialog = ({
             </div>
 
             <div>
-              <label className="block text-xs text-gray-600 mb-1">스타일</label>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">스타일</label>
               <div className="flex gap-1">
                 <button
                   onClick={() =>
@@ -156,7 +156,7 @@ export const AdvancedFormatDialog = ({
                   className={`flex-1 px-2 py-1 text-sm border rounded ${
                     style.fontWeight === 'bold'
                       ? 'bg-blue-500 text-white'
-                      : 'bg-white text-gray-700'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
                   }`}
                 >
                   <span className="font-bold">B</span>
@@ -171,7 +171,7 @@ export const AdvancedFormatDialog = ({
                   className={`flex-1 px-2 py-1 text-sm border rounded ${
                     style.fontStyle === 'italic'
                       ? 'bg-blue-500 text-white'
-                      : 'bg-white text-gray-700'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
                   }`}
                 >
                   <span className="italic">I</span>
@@ -183,14 +183,14 @@ export const AdvancedFormatDialog = ({
 
         {/* Border Section */}
         <div className="mb-6">
-          <h3 className="text-sm font-semibold mb-3">테두리</h3>
+          <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">테두리</h3>
 
           {/* All Borders */}
-          <div className="mb-3 p-3 bg-gray-50 rounded">
-            <div className="text-xs text-gray-600 mb-2">모든 테두리</div>
+          <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded">
+            <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">모든 테두리</div>
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block text-xs mb-1">두께</label>
+                <label className="block text-xs mb-1 text-gray-700 dark:text-gray-300">두께</label>
                 <input
                   type="number"
                   min="0"
@@ -199,11 +199,11 @@ export const AdvancedFormatDialog = ({
                   onChange={(e) =>
                     applyToAllBorders({ width: Number(e.target.value) })
                   }
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                  className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
-                <label className="block text-xs mb-1">스타일</label>
+                <label className="block text-xs mb-1 text-gray-700 dark:text-gray-300">스타일</label>
                 <select
                   value={style.border?.top?.style || 'solid'}
                   onChange={(e) =>
@@ -211,7 +211,7 @@ export const AdvancedFormatDialog = ({
                       style: e.target.value as BorderStyle['style'],
                     })
                   }
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                  className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 >
                   <option value="solid">실선</option>
                   <option value="dashed">파선</option>
@@ -220,12 +220,12 @@ export const AdvancedFormatDialog = ({
                 </select>
               </div>
               <div>
-                <label className="block text-xs mb-1">색상</label>
+                <label className="block text-xs mb-1 text-gray-700 dark:text-gray-300">색상</label>
                 <input
                   type="color"
                   value={style.border?.top?.color || '#000000'}
                   onChange={(e) => applyToAllBorders({ color: e.target.value })}
-                  className="w-full h-8 rounded border border-gray-300 cursor-pointer"
+                  className="w-full h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
                 />
               </div>
             </div>
@@ -234,8 +234,8 @@ export const AdvancedFormatDialog = ({
           {/* Individual Borders */}
           <div className="grid grid-cols-2 gap-3">
             {(['top', 'right', 'bottom', 'left'] as const).map((side) => (
-              <div key={side} className="p-2 border border-gray-200 rounded">
-                <div className="text-xs font-medium mb-2">
+              <div key={side} className="p-2 border border-gray-200 dark:border-gray-700 rounded">
+                <div className="text-xs font-medium mb-2 text-gray-900 dark:text-gray-100">
                   {side === 'top' && '위'}
                   {side === 'right' && '오른쪽'}
                   {side === 'bottom' && '아래'}
@@ -250,7 +250,7 @@ export const AdvancedFormatDialog = ({
                     onChange={(e) =>
                       updateBorder(side, { width: Number(e.target.value) })
                     }
-                    className="px-1 py-0.5 text-xs border border-gray-300 rounded"
+                    className="px-1 py-0.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                     placeholder="두께"
                   />
                   <select
@@ -260,7 +260,7 @@ export const AdvancedFormatDialog = ({
                         style: e.target.value as BorderStyle['style'],
                       })
                     }
-                    className="px-1 py-0.5 text-xs border border-gray-300 rounded"
+                    className="px-1 py-0.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   >
                     <option value="solid">실선</option>
                     <option value="dashed">파선</option>
@@ -271,7 +271,7 @@ export const AdvancedFormatDialog = ({
                     type="color"
                     value={style.border?.[side]?.color || '#000000'}
                     onChange={(e) => updateBorder(side, { color: e.target.value })}
-                    className="w-full h-6 rounded border border-gray-300 cursor-pointer"
+                    className="w-full h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
                   />
                 </div>
               </div>
@@ -281,16 +281,16 @@ export const AdvancedFormatDialog = ({
 
         {/* Number Format Section */}
         <div className="mb-6">
-          <h3 className="text-sm font-semibold mb-3">숫자 포맷</h3>
+          <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">숫자 포맷</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-600 mb-1">프리셋</label>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">프리셋</label>
               <select
                 value={style.numberFormat}
                 onChange={(e) =>
                   setStyle({ ...style, numberFormat: e.target.value })
                 }
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 {NUMBER_FORMAT_PRESETS.map((preset) => (
                   <option key={preset.value} value={preset.value}>
@@ -300,7 +300,7 @@ export const AdvancedFormatDialog = ({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-600 mb-1">
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
                 커스텀 포맷
               </label>
               <input
@@ -310,18 +310,18 @@ export const AdvancedFormatDialog = ({
                   setStyle({ ...style, numberFormat: e.target.value })
                 }
                 placeholder="예: #,##0.00"
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
           </div>
-          <div className="mt-2 text-xs text-gray-500">
+          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
             예시: 1234.5 → {applyNumberFormatPreview(1234.5, style.numberFormat || '')}
           </div>
         </div>
 
         {/* Preview */}
         <div className="mb-6">
-          <h3 className="text-sm font-semibold mb-3">미리보기</h3>
+          <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">미리보기</h3>
           <div
             style={{
               fontFamily: style.fontFamily,
@@ -342,10 +342,10 @@ export const AdvancedFormatDialog = ({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">
+        <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+            className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
           >
             취소
           </button>

@@ -142,12 +142,12 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-[500px] max-h-[80vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[500px] max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">찾기 및 바꾸기</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">찾기 및 바꾸기</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             title="닫기"
           >
             ✕
@@ -156,7 +156,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
 
         {/* Search Input */}
         <div className="mb-3">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             찾기
           </label>
           <input
@@ -165,7 +165,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
             onChange={(e) => setSearchText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="검색할 텍스트 입력"
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             autoFocus
           />
         </div>
@@ -173,7 +173,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
         {/* Replace Input */}
         {showReplace && (
           <div className="mb-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               바꿀 내용
             </label>
             <input
@@ -182,7 +182,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
               onChange={(e) => setReplaceText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="바꿀 텍스트 입력"
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
         )}
@@ -196,7 +196,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
               onChange={(e) => setMatchCase(e.target.checked)}
               className="mr-2"
             />
-            <span className="text-sm">대소문자 구분</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">대소문자 구분</span>
           </label>
 
           <label className="flex items-center">
@@ -206,7 +206,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
               onChange={(e) => setMatchWholeCell(e.target.checked)}
               className="mr-2"
             />
-            <span className="text-sm">셀 전체 일치</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">셀 전체 일치</span>
           </label>
 
           <label className="flex items-center">
@@ -216,7 +216,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
               onChange={(e) => setSearchFormulas(e.target.checked)}
               className="mr-2"
             />
-            <span className="text-sm">수식 내 검색</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">수식 내 검색</span>
           </label>
 
           <label className="flex items-center">
@@ -226,7 +226,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
               onChange={(e) => setUseRegex(e.target.checked)}
               className="mr-2"
             />
-            <span className="text-sm">정규식 사용</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">정규식 사용</span>
           </label>
 
           <label className="flex items-center">
@@ -236,17 +236,17 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
               onChange={(e) => setSearchInAllSheets(e.target.checked)}
               className="mr-2"
             />
-            <span className="text-sm">모든 시트에서 검색</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">모든 시트에서 검색</span>
           </label>
         </div>
 
         {/* Results */}
         {results.length > 0 && (
-          <div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
-            <div className="text-sm text-gray-700">
+          <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
               {results.length}개 일치 항목 발견
               {results.length > 0 && (
-                <span className="ml-2 text-gray-500">
+                <span className="ml-2 text-gray-500 dark:text-gray-400">
                   ({selectedResultIndex + 1} / {results.length})
                 </span>
               )}
@@ -259,24 +259,24 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
                   key={`${result.cellId}-${index}`}
                   className={`text-xs p-2 rounded cursor-pointer ${
                     index === selectedResultIndex
-                      ? 'bg-blue-100 border border-blue-300'
-                      : 'hover:bg-gray-100'
+                      ? 'bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-600'
                   }`}
                   onClick={() => {
                     setSelectedResultIndex(index);
                     navigateToResult(result);
                   }}
                 >
-                  <span className="font-medium">{result.sheetName}</span> •{' '}
-                  <span className="text-gray-600">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{result.sheetName}</span> •{' '}
+                  <span className="text-gray-600 dark:text-gray-400">
                     {String.fromCharCode(65 + result.columnIndex)}
                     {result.rowIndex + 1}
                   </span>
-                  : {String(result.matchedText).substring(0, 50)}
+                  <span className="text-gray-700 dark:text-gray-300">: {String(result.matchedText).substring(0, 50)}</span>
                 </div>
               ))}
               {results.length > 10 && (
-                <div className="text-xs text-gray-500 p-2">
+                <div className="text-xs text-gray-500 dark:text-gray-400 p-2">
                   ... 외 {results.length - 10}개 더 보기
                 </div>
               )}
@@ -296,14 +296,14 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
             </button>
             <button
               onClick={handleFindPrevious}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-700"
               title="Shift+Enter"
             >
               ← 이전
             </button>
             <button
               onClick={handleFindNext}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-700"
               title="Enter"
             >
               다음 →
@@ -314,7 +314,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
           {!showReplace ? (
             <button
               onClick={() => setShowReplace(true)}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
             >
               바꾸기 옵션 표시
             </button>
@@ -338,7 +338,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
               </div>
               <button
                 onClick={() => setShowReplace(false)}
-                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm"
               >
                 바꾸기 옵션 숨기기
               </button>
@@ -347,7 +347,7 @@ export const SearchDialog = ({ onClose }: SearchDialogProps) => {
 
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+            className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-700"
           >
             닫기
           </button>

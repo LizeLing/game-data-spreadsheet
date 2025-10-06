@@ -215,17 +215,17 @@ export const ConditionalFormatDialog = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-[800px] max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">조건부 서식</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[800px] max-h-[80vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">조건부 서식</h2>
 
         {/* Presets */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">프리셋 적용</label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">프리셋 적용</label>
           <div className="flex gap-2">
             <select
               value={selectedPreset}
               onChange={(e) => setSelectedPreset(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value="none">프리셋 선택...</option>
               <option value="rarity">희귀도 색상 (Common ~ Mythic)</option>
@@ -236,7 +236,7 @@ export const ConditionalFormatDialog = ({
             <button
               onClick={() => applyPreset(selectedPreset)}
               disabled={selectedPreset === 'none'}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
             >
               적용
             </button>
@@ -259,16 +259,16 @@ export const ConditionalFormatDialog = ({
 
         <button
           onClick={addNewFormat}
-          className="mb-4 px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
+          className="mb-4 px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded"
         >
           + 규칙 추가
         </button>
 
         {/* Actions */}
-        <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">
+        <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+            className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
           >
             취소
           </button>
@@ -313,12 +313,12 @@ const FormatRuleEditor = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded p-4">
+    <div className="border border-gray-200 dark:border-gray-700 rounded p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium">규칙 {index + 1}</span>
+        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">규칙 {index + 1}</span>
         <button
           onClick={onDelete}
-          className="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-sm"
+          className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 px-2 py-1 rounded text-sm"
         >
           삭제
         </button>
@@ -327,7 +327,7 @@ const FormatRuleEditor = ({
       <div className="grid grid-cols-3 gap-3 mb-3">
         {/* Condition Type */}
         <div>
-          <label className="block text-xs text-gray-600 mb-1">조건 타입</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">조건 타입</label>
           <select
             value={format.condition.type}
             onChange={(e) =>
@@ -335,7 +335,7 @@ const FormatRuleEditor = ({
                 type: e.target.value as 'value' | 'text' | 'formula',
               })
             }
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             <option value="value">숫자</option>
             <option value="text">텍스트</option>
@@ -344,7 +344,7 @@ const FormatRuleEditor = ({
 
         {/* Operator */}
         <div>
-          <label className="block text-xs text-gray-600 mb-1">연산자</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">연산자</label>
           <select
             value={format.condition.operator}
             onChange={(e) =>
@@ -352,7 +352,7 @@ const FormatRuleEditor = ({
                 operator: e.target.value as ConditionalFormat['condition']['operator'],
               })
             }
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             <option value="equals">같음</option>
             <option value="notEquals">같지 않음</option>
@@ -373,7 +373,7 @@ const FormatRuleEditor = ({
 
         {/* Value */}
         <div>
-          <label className="block text-xs text-gray-600 mb-1">값</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">값</label>
           <input
             type={format.condition.type === 'value' ? 'number' : 'text'}
             value={String(format.condition.value ?? '')}
@@ -384,7 +384,7 @@ const FormatRuleEditor = ({
                   : e.target.value;
               updateCondition({ value });
             }}
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
         </div>
       </div>
@@ -392,27 +392,27 @@ const FormatRuleEditor = ({
       {/* Style Controls */}
       <div className="grid grid-cols-4 gap-3">
         <div>
-          <label className="block text-xs text-gray-600 mb-1">배경색</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">배경색</label>
           <input
             type="color"
             value={format.style.backgroundColor || '#ffffff'}
             onChange={(e) => updateStyle({ backgroundColor: e.target.value })}
-            className="w-full h-8 rounded border border-gray-300 cursor-pointer"
+            className="w-full h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
           />
         </div>
 
         <div>
-          <label className="block text-xs text-gray-600 mb-1">글자색</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">글자색</label>
           <input
             type="color"
             value={format.style.color || '#000000'}
             onChange={(e) => updateStyle({ color: e.target.value })}
-            className="w-full h-8 rounded border border-gray-300 cursor-pointer"
+            className="w-full h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
           />
         </div>
 
         <div>
-          <label className="block text-xs text-gray-600 mb-1">굵기</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">굵기</label>
           <select
             value={format.style.fontWeight || 'normal'}
             onChange={(e) =>
@@ -420,7 +420,7 @@ const FormatRuleEditor = ({
                 fontWeight: e.target.value as 'normal' | 'bold',
               })
             }
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             <option value="normal">보통</option>
             <option value="bold">굵게</option>
@@ -428,19 +428,19 @@ const FormatRuleEditor = ({
         </div>
 
         <div>
-          <label className="block text-xs text-gray-600 mb-1">우선순위</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">우선순위</label>
           <input
             type="number"
             value={format.priority}
             onChange={(e) => onChange({ priority: Number(e.target.value) })}
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
         </div>
       </div>
 
       {/* Preview */}
-      <div className="mt-3 p-2 border border-gray-200 rounded">
-        <div className="text-xs text-gray-600 mb-1">미리보기:</div>
+      <div className="mt-3 p-2 border border-gray-200 dark:border-gray-700 rounded">
+        <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">미리보기:</div>
         <div
           style={{
             backgroundColor: format.style.backgroundColor,

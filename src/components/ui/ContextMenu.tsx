@@ -86,7 +86,7 @@ export const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
   return (
     <div
       ref={menuRef}
-      className="fixed bg-white shadow-lg rounded-lg border border-gray-200 py-1 min-w-[200px] z-50"
+      className="fixed bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700 py-1 min-w-[200px] z-50"
       style={{ left: x, top: y }}
     >
       {items.map((item) => {
@@ -94,7 +94,7 @@ export const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
           return (
             <div
               key={item.id}
-              className="h-px bg-gray-200 my-1"
+              className="h-px bg-gray-200 dark:bg-gray-700 my-1"
               role="separator"
             />
           );
@@ -109,8 +109,8 @@ export const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
               w-full px-4 py-2 text-left text-sm flex items-center justify-between gap-2
               ${
                 item.disabled
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer'
+                  ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer'
               }
               transition-colors
             `}
@@ -120,7 +120,7 @@ export const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
               <span>{item.label}</span>
             </div>
             {item.shortcut && (
-              <kbd className="text-xs text-gray-400 font-mono">
+              <kbd className="text-xs text-gray-400 dark:text-gray-500 font-mono">
                 {item.shortcut}
               </kbd>
             )}
