@@ -535,7 +535,7 @@ export const Toolbar = () => {
           <select
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
-            className="px-2 py-1 text-sm border border-gray-300 rounded hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             title="내보내기 형식"
           >
             <option value="csv">CSV</option>

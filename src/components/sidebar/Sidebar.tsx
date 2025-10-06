@@ -241,11 +241,11 @@ export const Sidebar = () => {
       </div>
 
       {/* Templates section */}
-      <div className="border-t border-gray-200 p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">템플릿</h3>
+      <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">템플릿</h3>
         <button
           onClick={() => setShowTemplateGallery(true)}
-          className="w-full px-3 py-2 text-sm rounded bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 transition-all font-medium"
+          className="w-full px-3 py-2 text-sm rounded bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 text-white hover:from-primary-600 hover:to-primary-700 dark:hover:from-primary-700 dark:hover:to-primary-800 transition-all font-medium"
         >
           📋 템플릿 둘러보기
         </button>
@@ -283,15 +283,15 @@ const TemplateGallery = ({
 }: TemplateGalleryProps) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
         {/* Header */}
-        <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-800">
+        <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
             게임 데이터 템플릿
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none"
           >
             ×
           </button>
@@ -315,7 +315,7 @@ const TemplateGallery = ({
             <div>
               <button
                 onClick={() => onSelectTemplate(null)}
-                className="text-sm text-primary-600 hover:text-primary-700 mb-4 flex items-center gap-1"
+                className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 mb-4 flex items-center gap-1"
               >
                 ← 템플릿 목록으로
               </button>
@@ -332,16 +332,16 @@ const TemplateGallery = ({
 
         {/* Footer */}
         {selectedTemplate && (
-          <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+          <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
             >
               취소
             </button>
             <button
               onClick={onCreate}
-              className="px-4 py-2 text-sm text-white bg-primary-600 rounded hover:bg-primary-700"
+              className="px-4 py-2 text-sm text-white bg-primary-600 dark:bg-primary-700 rounded hover:bg-primary-700 dark:hover:bg-primary-800"
             >
               시트 생성
             </button>
@@ -384,8 +384,8 @@ const TemplateCard = ({ template, onClick }: TemplateCardProps) => {
       }`}
     >
       <div className="text-3xl mb-2">{template.icon}</div>
-      <div className="font-semibold text-gray-800 mb-1">{template.name}</div>
-      <div className="text-xs text-gray-600">{template.description}</div>
+      <div className="font-semibold text-gray-800 dark:text-gray-100 mb-1">{template.name}</div>
+      <div className="text-xs text-gray-600 dark:text-gray-300">{template.description}</div>
     </button>
   );
 };
@@ -402,31 +402,31 @@ const TemplatePreview = ({ template, templateInfo }: TemplatePreviewProps) => {
       <div className="flex items-center gap-3 mb-4">
         <div className="text-4xl">{templateInfo.icon}</div>
         <div>
-          <h3 className="text-lg font-semibold text-gray-800">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
             {template.name}
           </h3>
-          <p className="text-sm text-gray-600">{templateInfo.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{templateInfo.description}</p>
         </div>
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">컬럼:</h4>
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">컬럼:</h4>
         <div className="grid grid-cols-2 gap-2">
           {template.columns.map((col) => (
             <div key={col.id} className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 bg-primary-400 rounded-full"></div>
-              <span className="font-medium text-gray-700">{col.name}</span>
-              <span className="text-gray-500">({col.type})</span>
+              <div className="w-2 h-2 bg-primary-400 dark:bg-primary-500 rounded-full"></div>
+              <span className="font-medium text-gray-700 dark:text-gray-200">{col.name}</span>
+              <span className="text-gray-500 dark:text-gray-400">({col.type})</span>
             </div>
           ))}
         </div>
 
         {template.sampleData && template.sampleData.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
               샘플 데이터:
             </h4>
-            <div className="text-xs text-gray-600 bg-white rounded p-2 border border-gray-200">
+            <div className="text-xs text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-600">
               {template.sampleData.length}개의 샘플 행 사용 가능
             </div>
           </div>

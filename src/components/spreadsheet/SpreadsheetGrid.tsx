@@ -860,8 +860,8 @@ export const SpreadsheetGrid = ({ sheetId }: SpreadsheetGridProps) => {
 
   if (!sheet) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-50">
-        <p className="text-gray-500">No sheet selected</p>
+      <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
+        <p className="text-gray-500 dark:text-gray-400">No sheet selected</p>
       </div>
     );
   }
