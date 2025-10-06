@@ -250,4 +250,73 @@ describe('FormulaEvaluator', () => {
       }).toThrow();
     });
   });
+
+  describe('Statistical Functions', () => {
+    it('should calculate MEDIAN with odd count', () => {
+      const sheet = createMockSheet({
+        rows: [{ A: 1 }, { A: 2 }, { A: 3 }, { A: 4 }, { A: 5 }],
+      });
+
+      const result = evaluator.evaluate('test', '=MEDIAN(A1:A5)', sheet);
+      expect(result).toBe(3);
+    });
+
+    it('should calculate MEDIAN with even count', () => {
+      const sheet = createMockSheet({
+        rows: [{ A: 1 }, { A: 2 }, { A: 3 }, { A: 4 }],
+      });
+
+      const result = evaluator.evaluate('test', '=MEDIAN(A1:A4)', sheet);
+      expect(result).toBe(2.5);
+    });
+
+    it('should calculate MODE', () => {
+      const sheet = createMockSheet({
+        rows: [{ A: 1 }, { A: 2 }, { A: 2 }, { A: 3 }, { A: 2 }],
+      });
+
+      const result = evaluator.evaluate('test', '=MODE(A1:A5)', sheet);
+      expect(result).toBe(2);
+    });
+
+    it('should calculate STDEV (sample)', () => {
+      const sheet = createMockSheet({
+        rows: [{ A: 2 }, { A: 4 }, { A: 6 }, { A: 8 }],
+      });
+
+      const result = evaluator.evaluate('test', '=STDEV(A1:A4)', sheet);
+      // STDEV of [2, 4, 6, 8] ≈ 2.58
+      expect(result).toBeCloseTo(2.58, 1);
+    });
+
+    it('should calculate STDEVP (population)', () => {
+      const sheet = createMockSheet({
+        rows: [{ A: 2 }, { A: 4 }, { A: 6 }, { A: 8 }],
+      });
+
+      const result = evaluator.evaluate('test', '=STDEVP(A1:A4)', sheet);
+      // STDEVP of [2, 4, 6, 8] ≈ 2.24
+      expect(result).toBeCloseTo(2.24, 1);
+    });
+
+    it('should calculate VAR (sample variance)', () => {
+      const sheet = createMockSheet({
+        rows: [{ A: 2 }, { A: 4 }, { A: 6 }, { A: 8 }],
+      });
+
+      const result = evaluator.evaluate('test', '=VAR(A1:A4)', sheet);
+      // VAR of [2, 4, 6, 8] ≈ 6.67
+      expect(result).toBeCloseTo(6.67, 1);
+    });
+
+    it('should calculate VARP (population variance)', () => {
+      const sheet = createMockSheet({
+        rows: [{ A: 2 }, { A: 4 }, { A: 6 }, { A: 8 }],
+      });
+
+      const result = evaluator.evaluate('test', '=VARP(A1:A4)', sheet);
+      // VARP of [2, 4, 6, 8] = 5
+      expect(result).toBe(5);
+    });
+  });
 });

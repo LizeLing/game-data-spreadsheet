@@ -27,6 +27,14 @@ export const FORMULA_FUNCTIONS: Record<string, FormulaFunction> = {
   SQRT,
   POWER,
 
+  // Statistical Functions
+  MEDIAN,
+  MODE,
+  STDEV,
+  STDEVP,
+  VAR,
+  VARP,
+
   // Logical Functions
   IF,
   AND,
@@ -164,6 +172,125 @@ function POWER(
   const b = toNumber(base);
   const e = toNumber(exponent);
   return b !== null && e !== null ? Math.pow(b, e) : null;
+}
+
+// ============ Statistical Functions ============
+
+/**
+ * MEDIAN: 중앙값
+ */
+function MEDIAN(...args: (CellValue | CellValue[])[]): CellValue {
+  const flattened = flatten(args);
+  const numbers = flattened
+    .map(toNumber)
+    .filter((n): n is number => n !== null)
+    .sort((a, b) => a - b);
+
+  if (numbers.length === 0) return null;
+
+  const mid = Math.floor(numbers.length / 2);
+  if (numbers.length % 2 === 0) {
+    return (numbers[mid - 1] + numbers[mid]) / 2;
+  }
+  return numbers[mid];
+}
+
+/**
+ * MODE: 최빈값 (가장 자주 나타나는 값)
+ */
+function MODE(...args: (CellValue | CellValue[])[]): CellValue {
+  const flattened = flatten(args);
+  const numbers = flattened
+    .map(toNumber)
+    .filter((n): n is number => n !== null);
+
+  if (numbers.length === 0) return null;
+
+  const frequency: Map<number, number> = new Map();
+  let maxFreq = 0;
+  let mode: number | null = null;
+
+  numbers.forEach((num) => {
+    const freq = (frequency.get(num) || 0) + 1;
+    frequency.set(num, freq);
+
+    if (freq > maxFreq) {
+      maxFreq = freq;
+      mode = num;
+    }
+  });
+
+  return maxFreq > 1 ? mode : null;
+}
+
+/**
+ * STDEV: 표본 표준편차 (Sample Standard Deviation)
+ */
+function STDEV(...args: (CellValue | CellValue[])[]): CellValue {
+  const flattened = flatten(args);
+  const numbers = flattened
+    .map(toNumber)
+    .filter((n): n is number => n !== null);
+
+  if (numbers.length < 2) return null;
+
+  const avg = numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
+  const variance =
+    numbers.reduce((sum, n) => sum + Math.pow(n - avg, 2), 0) /
+    (numbers.length - 1);
+
+  return Math.sqrt(variance);
+}
+
+/**
+ * STDEVP: 모집단 표준편차 (Population Standard Deviation)
+ */
+function STDEVP(...args: (CellValue | CellValue[])[]): CellValue {
+  const flattened = flatten(args);
+  const numbers = flattened
+    .map(toNumber)
+    .filter((n): n is number => n !== null);
+
+  if (numbers.length === 0) return null;
+
+  const avg = numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
+  const variance =
+    numbers.reduce((sum, n) => sum + Math.pow(n - avg, 2), 0) / numbers.length;
+
+  return Math.sqrt(variance);
+}
+
+/**
+ * VAR: 표본 분산 (Sample Variance)
+ */
+function VAR(...args: (CellValue | CellValue[])[]): CellValue {
+  const flattened = flatten(args);
+  const numbers = flattened
+    .map(toNumber)
+    .filter((n): n is number => n !== null);
+
+  if (numbers.length < 2) return null;
+
+  const avg = numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
+  return (
+    numbers.reduce((sum, n) => sum + Math.pow(n - avg, 2), 0) /
+    (numbers.length - 1)
+  );
+}
+
+/**
+ * VARP: 모집단 분산 (Population Variance)
+ */
+function VARP(...args: (CellValue | CellValue[])[]): CellValue {
+  const flattened = flatten(args);
+  const numbers = flattened
+    .map(toNumber)
+    .filter((n): n is number => n !== null);
+
+  if (numbers.length === 0) return null;
+
+  const avg = numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
+  return numbers.reduce((sum, n) => sum + Math.pow(n - avg, 2), 0) / numbers.length;
 }
 
 // ============ Logical Functions ============
